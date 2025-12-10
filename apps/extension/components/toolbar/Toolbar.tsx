@@ -1,16 +1,16 @@
 import { useTextSelection } from "@/hooks/useTextSelection";
+import { applyHighlight } from "@/utils/highlight/serialization";
 
 const Toolbar = () => {
-	const { clientRect, isCollapsed } = useTextSelection();
+	const { clientRect, isCollapsed, range } = useTextSelection();
 
-	if (isCollapsed || !clientRect) return null;
+	if (isCollapsed || !clientRect || !range) return null;
 
 	const top = clientRect.top + window.scrollY - 50;
 	const left = clientRect.left + clientRect.width / 2 + window.scrollX;
 
 	return (
-		<button
-			type="button"
+		<div
 			style={{
 				position: "absolute",
 				top: `${top}px`,
@@ -23,12 +23,13 @@ const Toolbar = () => {
 				zIndex: 9999,
 				cursor: "pointer",
 			}}
-			onMouseDown={(e) => e.preventDefault()}
 		>
-			<span>하이라이트</span>
+			<button type="button" onClick={() => applyHighlight(range)}>
+				하이라이트
+			</button>
 			<span> | </span>
 			<span>메모</span>
-		</button>
+		</div>
 	);
 };
 
