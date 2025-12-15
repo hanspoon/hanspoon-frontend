@@ -1,17 +1,18 @@
+import { useLiveQuery } from "dexie-react-hooks";
 import { useEffect } from "react";
-import { useHighlights } from "@/hooks/useHighlights";
+import { getAllHighlights } from "@/apis/fetcher";
 import { deserializeRange } from "@/lib/highlight/deserialization";
 import { appendHighlightTag } from "@/lib/highlight/highlight";
 import type { SerializedHighlight } from "@/lib/highlight/types";
 
 export function HighlightRestorer() {
-	const highlights = useHighlights();
+	const allHighlights = useLiveQuery(getAllHighlights);
 
 	useEffect(() => {
-		if (!highlights) return;
+		if (!allHighlights || allHighlights.length === 0) return;
 
 		try {
-			highlights.forEach((data: SerializedHighlight) => {
+			allHighlights.forEach((data: SerializedHighlight) => {
 				const range = deserializeRange(data);
 				if (range) {
 					appendHighlightTag(range, data.id);
@@ -22,7 +23,7 @@ export function HighlightRestorer() {
 		} catch (e) {
 			console.error("하이라이트 데이터 처리 중 에러 발생", e);
 		}
-	}, [highlights]);
+	}, [allHighlights]);
 
 	return null;
 }
