@@ -1,8 +1,8 @@
+import { deleteHighlight, saveHighlight } from "@/apis/fetcher";
 import { type ClientRect, useTextSelection } from "@/hooks/useTextSelection";
 import { appendHighlightTag, generateId } from "@/lib/highlight/highlight";
 import { removeHighlight } from "@/lib/highlight/remove";
 import { serializeRange } from "@/lib/highlight/serialization";
-import { saveHighlightToDB } from "@/models/highlight-storage";
 
 const Toolbar = () => {
 	const { clientRect, isCollapsed, range } = useTextSelection();
@@ -52,7 +52,7 @@ const Toolbar = () => {
 							id,
 							$root: document.body,
 						});
-						await saveHighlightToDB(serializedData);
+						await saveHighlight(serializedData);
 						appendHighlightTag(range, id);
 					}}
 					style={{
@@ -66,9 +66,10 @@ const Toolbar = () => {
 			) : (
 				<button
 					type="button"
-					onClick={() => {
+					onClick={async () => {
 						if (clickedHighlight) {
 							removeHighlight(clickedHighlight.id);
+							await deleteHighlight(clickedHighlight.id);
 							clearHighlightSelection();
 						}
 					}}
