@@ -1,12 +1,19 @@
-import { deleteHighlight, saveHighlight } from "@/apis/fetcher";
+import {
+	addPost,
+	deleteHighlight,
+	getPostById,
+	saveHighlight,
+} from "@/apis/fetcher";
 import { type ClientRect, useTextSelection } from "@/hooks/useTextSelection";
 import { appendHighlightTag, generateId } from "@/lib/highlight/highlight";
 import { removeHighlight } from "@/lib/highlight/remove";
 import { serializeRange } from "@/lib/highlight/serialization";
+import { extractPostData } from "@/lib/post/postExtractor";
 
 const Toolbar = () => {
 	const { clientRect, isCollapsed, range } = useTextSelection();
 	const { clickedHighlight, clearHighlightSelection } = useHighlightSelection();
+	const postId = window.location.href;
 
 	const isNotSelected = clientRect === undefined;
 
@@ -46,13 +53,20 @@ const Toolbar = () => {
 				<button
 					type="button"
 					onClick={async () => {
+						const existingPost = await getPostById(postId);
+						if (!existingPost) {
+							const postData = extractPostData();
+							postData.updatedAt = Date.now();
+							await addPost(postData);
+						}
+
 						const id = generateId();
 						const serializedData = serializeRange({
 							range,
 							id,
 							$root: document.body,
 						});
-						await saveHighlight(serializedData);
+						await saveHighlight({ data: serializedData, postId });
 						appendHighlightTag(range, id);
 					}}
 					style={{
