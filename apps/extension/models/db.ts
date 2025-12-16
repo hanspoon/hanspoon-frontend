@@ -1,18 +1,18 @@
 import Dexie, { type Table } from "dexie";
-import type { SerializedHighlight } from "../lib/highlight/types";
+import type { LocalAnnotation, LocalPost } from "../lib/highlight/types";
 
-export interface Highlight extends SerializedHighlight {}
-
-export class HighlightDB extends Dexie {
-	highlights!: Table<Highlight, string>;
+export class AppDB extends Dexie {
+	posts!: Table<LocalPost, string>;
+	annotations!: Table<LocalAnnotation, string>;
 
 	constructor() {
-		super("HanspoonHighlightDB");
+		super("HanspoonDB");
 
 		this.version(1).stores({
-			highlights: "id, text",
+			posts: "id, url, updatedAt",
+			annotations: "id, postId, shareId",
 		});
 	}
 }
 
-export const db = new HighlightDB();
+export const db = new AppDB();
