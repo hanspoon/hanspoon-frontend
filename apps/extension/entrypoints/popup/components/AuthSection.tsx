@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type Session } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
 
 const supabase = createClient(
@@ -7,18 +7,23 @@ const supabase = createClient(
 );
 
 const AuthSection = () => {
-	const [session, setSession] = useState<any>(null);
+	const [session, setSession] = useState<Session | null>(null);
 
 	useEffect(() => {
 		browser.storage.local.get("session").then((res) => {
 			if (res.session) setSession(res.session);
 		});
+	}, []);
 
-		const handleStorageChange = (changes: any) => {
+	useEffect(() => {
+		const handleStorageChange = (changes: {
+			[key: string]: Browser.storage.StorageChange;
+		}) => {
 			if (changes.session) {
 				setSession(changes.session.newValue);
 			}
 		};
+
 		browser.storage.onChanged.addListener(handleStorageChange);
 		return () => browser.storage.onChanged.removeListener(handleStorageChange);
 	}, []);
