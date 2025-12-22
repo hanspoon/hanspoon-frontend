@@ -11,7 +11,7 @@ export function extractPostData(): LocalPost {
 	) as HTMLLinkElement;
 	const favIconUrl = favIconLink ? favIconLink.href : "";
 
-	const id = url;
+	const id = crypto.randomUUID();
 
 	return {
 		id,

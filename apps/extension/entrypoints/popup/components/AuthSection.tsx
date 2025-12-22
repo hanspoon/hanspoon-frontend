@@ -1,5 +1,7 @@
 import { createClient, type Session } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
+import { syncPostToSupabase } from "@/lib/highlight/syncPostToSupabase";
+import { db } from "@/models/db";
 
 const supabase = createClient(
 	import.meta.env.VITE_SUPABASE_URL,
@@ -75,8 +77,30 @@ const AuthSection = () => {
 			<p>반갑습니다, {session.user.user_metadata.full_name}님!</p>
 			<button
 				type="button"
-				onClick={() => {
-					console.log("공유하기 버튼 클릭");
+				onClick={async () => {
+					const getCurrentPostId = async () => {
+						const tabs = await browser.tabs.query({
+							active: true,
+							currentWindow: true,
+						});
+
+						if (tabs[0].url === undefined) return null;
+
+						const post = await db.posts
+							.where("url")
+							.equals(tabs[0].url)
+							.first();
+
+						return post?.id || null;
+					};
+					const postID = await getCurrentPostId();
+
+					if (!postID) {
+						console.log("해당 포스트가 없습니다.", postID);
+						return;
+					}
+
+					syncPostToSupabase(postID, session);
 				}}
 			>
 				공유하기 링크 생성

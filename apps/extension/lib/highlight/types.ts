@@ -1,3 +1,5 @@
+type UUID = string;
+
 export interface DomMeta {
 	parentTagName: string;
 	parentIndex: number;
@@ -5,14 +7,14 @@ export interface DomMeta {
 }
 
 export interface SerializedHighlight {
-	id: string;
+	id: UUID;
 	start: DomMeta;
 	end: DomMeta;
 	text: string;
 }
 export interface LocalAnnotation {
-	id: string;
-	postId: string;
+	id: UUID;
+	postId: UUID;
 
 	start: DomMeta;
 	end: DomMeta;
@@ -25,7 +27,7 @@ export interface LocalAnnotation {
 }
 
 export interface LocalPost {
-	id: string;
+	id: UUID;
 	url: string;
 
 	title: string;

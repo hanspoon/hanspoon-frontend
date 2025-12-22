@@ -1,4 +1,4 @@
-import { CAMEL_DATASET_IDENTIFIER, DATASET_IDENTIFIER } from "./const";
+import { CAMEL_DATASET_IDENTIFIER } from "./const";
 
 function getTextNodesInRange(range: Range) {
 	if (range.commonAncestorContainer.nodeType === Node.TEXT_NODE) {
@@ -27,7 +27,7 @@ function getTextNodesInRange(range: Range) {
 }
 
 export const generateId = () => {
-	return `${DATASET_IDENTIFIER}-${Date.now()}`;
+	return crypto.randomUUID();
 };
 
 export const appendHighlightTag = (range: Range, savedId: string) => {
