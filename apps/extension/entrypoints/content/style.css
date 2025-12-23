@@ -21,6 +21,11 @@ dd {
 	margin: 0;
 }
 
+a {
+	text-decoration: none;
+	color: inherit;
+}
+
 ul[role="list"],
 ol[role="list"] {
 	list-style: none;
