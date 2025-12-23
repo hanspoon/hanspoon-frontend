@@ -69,6 +69,9 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.88.0
         version: 2.88.0
+      '@tailwindcss/vite':
+        specifier: ^4.1.17
+        version: 4.1.17(vite@7.2.6(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2))
       dexie:
         specifier: ^4.2.1
         version: 4.2.1
@@ -84,6 +87,9 @@ importers:
       react-router:
         specifier: ^7.10.1
         version: 7.10.1(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      tailwindcss:
+        specifier: ^4.1.17
+        version: 4.1.17
     devDependencies:
       '@types/chrome':
         specifier: ^0.1.32
