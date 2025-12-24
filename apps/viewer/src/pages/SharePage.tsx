@@ -7,17 +7,6 @@ const supabase = createClient(
 );
 
 const fetchAnnotations = async (shareId: string) => {
-	const sessionStr = localStorage.getItem("session");
-	if (!sessionStr) {
-		throw new Error("No session found");
-	}
-	const session = JSON.parse(sessionStr);
-	const { error: sessionError } = await supabase.auth.setSession({
-		access_token: session.access_token,
-		refresh_token: session.refresh_token,
-	});
-
-	if (sessionError) throw sessionError;
 	const { data: annotations, error: fetchError } = await supabase
 		.from("annotations")
 		.select()
@@ -27,17 +16,6 @@ const fetchAnnotations = async (shareId: string) => {
 };
 
 const fetchPost = async (shareId: string) => {
-	const sessionStr = localStorage.getItem("session");
-	if (!sessionStr) {
-		throw new Error("No session found");
-	}
-	const session = JSON.parse(sessionStr);
-	const { error: sessionError } = await supabase.auth.setSession({
-		access_token: session.access_token,
-		refresh_token: session.refresh_token,
-	});
-
-	if (sessionError) throw sessionError;
 	const { data: post, error: fetchError } = await supabase
 		.from("posts")
 		.select()
@@ -46,12 +24,18 @@ const fetchPost = async (shareId: string) => {
 	return post;
 };
 
+const getUserData = async () => {
+	const { data: userData, error: userError } = await supabase.auth.getUser();
+	if (userError) throw userError;
+	return userData;
+};
+
 const SharePage = () => {
-	const sessionStr = localStorage.getItem("session");
-	if (!sessionStr) {
-		throw new Error("No session found");
-	}
-	const session = JSON.parse(sessionStr);
+	const { data: userData } = useQuery({
+		queryKey: ["user-data"],
+		queryFn: getUserData,
+	});
+
 	const currentShareId = window.location.pathname.split("/")[2];
 	const {
 		data: annotations,
@@ -76,9 +60,6 @@ const SharePage = () => {
 	if (error || postError)
 		return <div>에러가 발생했습니다: {error?.message}</div>;
 
-	console.log("annotations", annotations);
-	console.log("post", post);
-
 	if (annotations === undefined) return <div>annotations is undefined</div>;
 	if (post === undefined) return <div>post is undefined</div>;
 
@@ -99,7 +80,7 @@ const SharePage = () => {
 				}}
 			>
 				<img
-					src={session.user.user_metadata.avatar_url}
+					src={userData?.user?.user_metadata?.avatar_url}
 					alt="profile_image"
 					width={184}
 					height={184}
@@ -109,7 +90,7 @@ const SharePage = () => {
 					}}
 				/>
 				<h1 style={{ fontSize: "44px", fontWeight: "bold" }}>
-					{session.user.user_metadata.full_name}
+					{userData?.user?.user_metadata?.full_name}
 				</h1>
 				<p style={{ fontSize: "20px", color: "#565656", width: "400px" }}>
 					📚 Haebom의 아카이브에 오신 걸 환영합니다.---IT 💻, 경제 💰, 인문학

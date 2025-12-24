@@ -22,8 +22,6 @@ const AuthCallback = () => {
 					return;
 				}
 
-				localStorage.setItem("session", JSON.stringify(session));
-
 				chrome.runtime.sendMessage(
 					import.meta.env.VITE_EXTENSION_ID,
 					{
