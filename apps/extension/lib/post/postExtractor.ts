@@ -22,7 +22,7 @@ export function extractPostData(): LocalPost {
 		createdAt: Date.now(),
 		updatedAt: Date.now(),
 		plainText: document.body.innerText,
-		shareId: null,
+		shareId: crypto.randomUUID(),
 		isSynced: false,
 	};
 }

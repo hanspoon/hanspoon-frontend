@@ -55,7 +55,7 @@ export async function syncPostToSupabase(
 		end_meta: ann.end,
 		text: ann.text,
 		user_id: session.user.id,
-		share_id: ann.shareId,
+		share_id: post.shareId,
 		updated_at: new Date().toISOString(),
 	}));
 
@@ -67,7 +67,7 @@ export async function syncPostToSupabase(
 
 	await db.posts.update(postId, {
 		isSynced: true,
-		shareId: crypto.randomUUID(),
+		shareId: post.shareId,
 	});
 
 	await db.annotations
