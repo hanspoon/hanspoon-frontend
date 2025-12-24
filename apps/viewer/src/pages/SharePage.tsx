@@ -1,4 +1,87 @@
+import { createClient } from "@supabase/supabase-js";
+import { useQuery } from "@tanstack/react-query";
+
+const supabase = createClient(
+	import.meta.env.VITE_SUPABASE_URL,
+	import.meta.env.VITE_SUPABASE_ANON_KEY,
+);
+
+const fetchAnnotations = async (shareId: string) => {
+	const sessionStr = localStorage.getItem("session");
+	if (!sessionStr) {
+		throw new Error("No session found");
+	}
+	const session = JSON.parse(sessionStr);
+	const { error: sessionError } = await supabase.auth.setSession({
+		access_token: session.access_token,
+		refresh_token: session.refresh_token,
+	});
+
+	if (sessionError) throw sessionError;
+	const { data: annotations, error: fetchError } = await supabase
+		.from("annotations")
+		.select()
+		.eq("share_id", shareId);
+	if (fetchError) throw fetchError;
+	return annotations;
+};
+
+const fetchPost = async (shareId: string) => {
+	const sessionStr = localStorage.getItem("session");
+	if (!sessionStr) {
+		throw new Error("No session found");
+	}
+	const session = JSON.parse(sessionStr);
+	const { error: sessionError } = await supabase.auth.setSession({
+		access_token: session.access_token,
+		refresh_token: session.refresh_token,
+	});
+
+	if (sessionError) throw sessionError;
+	const { data: post, error: fetchError } = await supabase
+		.from("posts")
+		.select()
+		.eq("share_id", shareId);
+	if (fetchError) throw fetchError;
+	return post;
+};
+
 const Share = () => {
+	const sessionStr = localStorage.getItem("session");
+	if (!sessionStr) {
+		throw new Error("No session found");
+	}
+	const session = JSON.parse(sessionStr);
+	const currentShareId = window.location.pathname.split("/")[2];
+	const {
+		data: annotations,
+		isLoading,
+		error,
+	} = useQuery({
+		queryKey: ["annotations", currentShareId],
+		queryFn: () => fetchAnnotations(currentShareId),
+		enabled: !!currentShareId,
+	});
+
+	const {
+		data: post,
+		isLoading: postLoading,
+		error: postError,
+	} = useQuery({
+		queryKey: ["posts", currentShareId],
+		queryFn: () => fetchPost(currentShareId),
+		enabled: !!currentShareId,
+	});
+	if (isLoading || postLoading) return <div>로딩 중...</div>;
+	if (error || postError)
+		return <div>에러가 발생했습니다: {error?.message}</div>;
+
+	console.log("annotations", annotations);
+	console.log("post", post);
+
+	if (annotations === undefined) return <div>annotations is undefined</div>;
+	if (post === undefined) return <div>post is undefined</div>;
+
 	return (
 		<div
 			style={{
@@ -16,7 +99,8 @@ const Share = () => {
 				}}
 			>
 				<img
-					src="https://i.pinimg.com/1200x/7d/ef/1e/7def1e13b878405623f041c5b96e7a60.jpg"
+					// src="https://i.pinimg.com/1200x/7d/ef/1e/7def1e13b878405623f041c5b96e7a60.jpg"
+					src={session.user.user_metadata.avatar_url}
 					alt="profile_image"
 					width={184}
 					height={184}
@@ -25,7 +109,9 @@ const Share = () => {
 						objectFit: "cover",
 					}}
 				/>
-				<h1 style={{ fontSize: "44px", fontWeight: "bold" }}>Haebom</h1>
+				<h1 style={{ fontSize: "44px", fontWeight: "bold" }}>
+					{session.user.user_metadata.full_name}
+				</h1>
 				<p style={{ fontSize: "20px", color: "#565656", width: "400px" }}>
 					📚 Haebom의 아카이브에 오신 걸 환영합니다.---IT 💻, 경제 💰, 인문학
 					<br />
@@ -56,8 +142,8 @@ const Share = () => {
 							padding: "24px",
 						}}
 					>
-						<p>zsh로 git 빠르게 쓰기</p>
-						<p style={{ color: "#565656" }}>gcam zsh로 git 빠르게 쓰기</p>
+						<p>{post[0].title}</p>
+						<p style={{ color: "#565656" }}>{post[0].url}</p>
 					</div>
 					<img
 						src="https://i.pinimg.com/1200x/7d/ef/1e/7def1e13b878405623f041c5b96e7a60.jpg"
@@ -99,7 +185,7 @@ const Share = () => {
 						gap: "12px",
 					}}
 				>
-					{HIGH_LIGHTS.map((highlight) => (
+					{annotations.map((highlight, index) => (
 						<div
 							key={highlight.text}
 							style={{
@@ -109,7 +195,7 @@ const Share = () => {
 								padding: "24px",
 							}}
 						>
-							{highlight.text}
+							{annotations[index].text}
 						</div>
 					))}
 				</div>
@@ -119,15 +205,3 @@ const Share = () => {
 };
 
 export default Share;
-
-const HIGH_LIGHTS = [
-	{
-		text: "zsh로 git 빠르게 쓰기",
-	},
-	{
-		text: "zsh로 git 빠르게 쓸까요?",
-	},
-	{
-		text: "zsh로 git 빠르게 쓸까요?",
-	},
-];
