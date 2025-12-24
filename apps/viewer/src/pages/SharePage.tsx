@@ -1,61 +1,25 @@
-import { createClient } from "@supabase/supabase-js";
 import { useQuery } from "@tanstack/react-query";
-
-const supabase = createClient(
-	import.meta.env.VITE_SUPABASE_URL,
-	import.meta.env.VITE_SUPABASE_ANON_KEY,
-);
-
-const fetchAnnotations = async (shareId: string) => {
-	const { data: annotations, error: fetchError } = await supabase
-		.from("annotations")
-		.select()
-		.eq("share_id", shareId);
-	if (fetchError) throw fetchError;
-	return annotations;
-};
-
-const fetchPost = async (shareId: string) => {
-	const { data: post, error: fetchError } = await supabase
-		.from("posts")
-		.select()
-		.eq("share_id", shareId);
-	if (fetchError) throw fetchError;
-	return post;
-};
-
-const getUserData = async () => {
-	const { data: userData, error: userError } = await supabase.auth.getUser();
-	if (userError) throw userError;
-	return userData;
-};
+import { annotationQueries } from "../queries/annotationQueries";
+import { postQueries } from "../queries/postQueries";
+import { userInfoQueries } from "../queries/userInfoQueries";
 
 const SharePage = () => {
-	const { data: userData } = useQuery({
-		queryKey: ["user-data"],
-		queryFn: getUserData,
-	});
+	const { data: userInfo } = useQuery(userInfoQueries.detail());
 
 	const currentShareId = window.location.pathname.split("/")[2];
+
 	const {
 		data: annotations,
 		isLoading,
 		error,
-	} = useQuery({
-		queryKey: ["annotations", currentShareId],
-		queryFn: () => fetchAnnotations(currentShareId),
-		enabled: !!currentShareId,
-	});
+	} = useQuery(annotationQueries.detail(currentShareId));
 
 	const {
 		data: post,
 		isLoading: postLoading,
 		error: postError,
-	} = useQuery({
-		queryKey: ["posts", currentShareId],
-		queryFn: () => fetchPost(currentShareId),
-		enabled: !!currentShareId,
-	});
+	} = useQuery(postQueries.detail(currentShareId));
+
 	if (isLoading || postLoading) return <div>로딩 중...</div>;
 	if (error || postError)
 		return <div>에러가 발생했습니다: {error?.message}</div>;
@@ -80,7 +44,7 @@ const SharePage = () => {
 				}}
 			>
 				<img
-					src={userData?.user?.user_metadata?.avatar_url}
+					src={userInfo?.user?.user_metadata?.avatar_url}
 					alt="profile_image"
 					width={184}
 					height={184}
@@ -90,7 +54,7 @@ const SharePage = () => {
 					}}
 				/>
 				<h1 style={{ fontSize: "44px", fontWeight: "bold" }}>
-					{userData?.user?.user_metadata?.full_name}
+					{userInfo?.user?.user_metadata?.full_name}
 				</h1>
 				<p style={{ fontSize: "20px", color: "#565656", width: "400px" }}>
 					📚 Haebom의 아카이브에 오신 걸 환영합니다.---IT 💻, 경제 💰, 인문학
@@ -107,7 +71,7 @@ const SharePage = () => {
 				}}
 			>
 				<a
-					href={post[0].url}
+					href={post.id}
 					style={{
 						width: "820px",
 						height: "175px",
@@ -122,8 +86,8 @@ const SharePage = () => {
 							padding: "24px",
 						}}
 					>
-						<p>{post[0].title}</p>
-						<p style={{ color: "#565656" }}>{post[0].url}</p>
+						<p>{post.title}</p>
+						<p style={{ color: "#565656" }}>{post.url}</p>
 					</div>
 					<img
 						src="https://i.pinimg.com/1200x/7d/ef/1e/7def1e13b878405623f041c5b96e7a60.jpg"
@@ -167,7 +131,7 @@ const SharePage = () => {
 				>
 					{annotations.map((highlight, index) => (
 						<div
-							key={highlight.text}
+							key={`${highlight.id || highlight.text}-${index}`}
 							style={{
 								border: "1px solid #EBEBEB",
 								aspectRatio: "1/1",
@@ -175,7 +139,7 @@ const SharePage = () => {
 								padding: "24px",
 							}}
 						>
-							{annotations[index].text}
+							{highlight.text}
 						</div>
 					))}
 				</div>
