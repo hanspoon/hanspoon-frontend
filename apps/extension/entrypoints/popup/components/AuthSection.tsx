@@ -93,7 +93,25 @@ const AuthSection = () => {
 
 						return post?.id || null;
 					};
+
+					const getCurrentShareId = async () => {
+						const tabs = await browser.tabs.query({
+							active: true,
+							currentWindow: true,
+						});
+
+						if (tabs[0].url === undefined) return null;
+
+						const post = await db.posts
+							.where("url")
+							.equals(tabs[0].url)
+							.first();
+
+						return post?.shareId || null;
+					};
+
 					const postID = await getCurrentPostId();
+					const shareID = await getCurrentShareId();
 
 					if (!postID) {
 						console.log("해당 포스트가 없습니다.", postID);
@@ -101,6 +119,10 @@ const AuthSection = () => {
 					}
 
 					syncPostToSupabase(postID, session);
+
+					browser.tabs.create({
+						url: `http://localhost:5173/share/${shareID}`,
+					});
 				}}
 			>
 				공유하기 링크 생성
