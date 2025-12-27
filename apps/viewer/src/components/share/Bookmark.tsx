@@ -1,18 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useShareId } from "../../hooks/useShareId";
 import { postQueries } from "../../queries/postQueries";
 
 export const Bookmark = () => {
 	const currentShareId = useShareId();
-	const {
-		data: post,
-		isLoading: postLoading,
-		error: postError,
-	} = useQuery(postQueries.detail(currentShareId));
-
-	if (postLoading) return <div>로딩 중...</div>;
-	if (postError) return <div>에러가 발생했습니다: {postError?.message}</div>;
-	if (post === undefined) return <div>post is undefined</div>;
+	const { data: post } = useSuspenseQuery(postQueries.detail(currentShareId));
 
 	return (
 		<a

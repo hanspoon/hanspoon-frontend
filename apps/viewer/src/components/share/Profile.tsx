@@ -1,15 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { userInfoQueries } from "../../queries/userInfoQueries";
 
 export const Profile = () => {
-	const {
-		data: userInfo,
-		isLoading,
-		isError,
-	} = useQuery(userInfoQueries.detail());
+	const { data: userInfo } = useSuspenseQuery(userInfoQueries.detail());
 
-	if (isLoading) return <div>로딩 중...</div>;
-	if (isError) return <div>에러가 발생했습니다</div>;
 	if (!userInfo) return null;
 
 	return (
