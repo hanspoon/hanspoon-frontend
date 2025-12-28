@@ -1,10 +1,10 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useShareId } from "../../hooks/useShareId";
-import { postQueries } from "../../queries/postQueries";
+import { postQueryOptions } from "../../queries/post";
 
 export const Bookmark = () => {
 	const currentShareId = useShareId();
-	const { data: post } = useSuspenseQuery(postQueries.detail(currentShareId));
+	const { data: post } = useSuspenseQuery(postQueryOptions(currentShareId));
 
 	return (
 		<a

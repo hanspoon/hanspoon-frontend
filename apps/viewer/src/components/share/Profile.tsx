@@ -1,8 +1,8 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { userInfoQueries } from "../../queries/userInfoQueries";
+import { userInfoQueryOptions } from "../../queries/userInfo";
 
 export const Profile = () => {
-	const { data: userInfo } = useSuspenseQuery(userInfoQueries.detail());
+	const { data: userInfo } = useSuspenseQuery(userInfoQueryOptions);
 
 	if (!userInfo) return null;
 

@@ -1,11 +1,11 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useShareId } from "../../hooks/useShareId";
-import { annotationQueries } from "../../queries/annotationQueries";
+import { annotationQueryOptions } from "../../queries/annotation";
 
 export const AnnotaionGrid = () => {
 	const currentShareId = useShareId();
 	const { data: annotations } = useSuspenseQuery(
-		annotationQueries.detail(currentShareId),
+		annotationQueryOptions(currentShareId),
 	);
 
 	return (
