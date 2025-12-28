@@ -21,3 +21,13 @@ export const fetchPost = async (shareId: string) => {
 
 	return post;
 };
+
+export const fetchAllPost = async () => {
+	const { data: posts, error: fetchError } = await supabase
+		.from("posts")
+		.select();
+
+	if (fetchError) throw fetchError;
+
+	return posts;
+};
