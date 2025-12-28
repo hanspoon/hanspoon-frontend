@@ -6,6 +6,8 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { BrowserRouter, Route, Routes } from "react-router";
 import App from "./App.tsx";
 import AuthCallback from "./components/AuthCallback.tsx";
+import { ProfileEditPage } from "./pages/profile/[id]/edit.tsx";
+import { ProfilePage } from "./pages/profile/[id]/index.tsx";
 import SharePage from "./pages/SharePage.tsx";
 
 const queryClient = new QueryClient();
@@ -20,6 +22,8 @@ if (rootElement) {
 						<Route path="/" element={<App />} />
 						<Route path="/auth/callback" element={<AuthCallback />} />
 						<Route path="/share/:shareId" element={<SharePage />} />
+						<Route path="/:username" element={<ProfilePage />} />
+						<Route path="/edit" element={<ProfileEditPage />} />
 					</Routes>
 				</BrowserRouter>
 				<ReactQueryDevtools initialIsOpen={true} />
