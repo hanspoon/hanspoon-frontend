@@ -12,7 +12,7 @@ export const PostGrid = () => {
 				gap: "12px",
 			}}
 		>
-			{posts?.map((post) => (
+			{posts.map((post) => (
 				<div
 					key={post.id}
 					style={{
