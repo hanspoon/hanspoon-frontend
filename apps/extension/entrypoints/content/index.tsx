@@ -1,6 +1,6 @@
 import ReactDOM from "react-dom/client";
 import { HighlightRestorer } from "@/components/toolbar/HighlightRestorer";
-import Toolbar from "@/components/toolbar/Toolbar";
+import { Toolbar } from "@/components/toolbar/Toolbar";
 import "./style.css";
 
 export default defineContentScript({

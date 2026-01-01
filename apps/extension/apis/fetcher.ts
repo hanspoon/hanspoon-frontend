@@ -16,6 +16,8 @@ export const saveHighlight = async ({
 	if (!response?.success) {
 		throw new Error(`DB Error: Highlight save failed`);
 	}
+
+	return { postId };
 };
 
 export const deleteHighlight = async (id: string) => {
@@ -51,4 +53,6 @@ export const addPost = async (data: LocalPost) => {
 	if (!response?.success) {
 		throw new Error(`DB Error: Post add failed`);
 	}
+
+	return data;
 };
