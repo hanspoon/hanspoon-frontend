@@ -1,14 +1,21 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useShareId } from "../../hooks/useShareId";
+import { annotationQueryOptions } from "../../queries/annotation";
 import { postQueryOptions } from "../../queries/post";
+import type { Database } from "../../types/database.types";
 
 export const Bookmark = () => {
 	const currentShareId = useShareId();
+
 	const { data: post } = useSuspenseQuery(postQueryOptions(currentShareId));
+
+	const { data: highlights } = useSuspenseQuery(
+		annotationQueryOptions(currentShareId),
+	);
 
 	return (
 		<a
-			href={post.url}
+			href={getShareableLink(highlights, post)}
 			style={{
 				width: "820px",
 				height: "175px",
@@ -40,3 +47,38 @@ export const Bookmark = () => {
 		</a>
 	);
 };
+
+type AnnotationRow = Database["public"]["Tables"]["annotations"]["Row"];
+type PostRow = Database["public"]["Tables"]["posts"]["Row"];
+
+function getShareableLink(highlights: AnnotationRow[], post: PostRow) {
+	const fragmentParams = highlights
+		.filter((h) => h.text)
+		.map((h) => convertToTextFragmentUrl(h.text));
+
+	if (fragmentParams.length > 0) {
+		return `${post.url}#:~:text=${fragmentParams.join("&text=")}`;
+	}
+
+	return post.url;
+}
+
+function convertToTextFragmentUrl(highlightText: string): string {
+	const cleanText = highlightText.trim().replace(/\s+/g, " ");
+
+	const encode = (str: string) =>
+		encodeURIComponent(str).replace(/-/g, "%2d").replace(/,/g, "%2c");
+
+	let fragmentParams = "";
+	const words = cleanText.split(" ");
+
+	if (words.length > 10) {
+		const start = encode(words.slice(0, 4).join(" "));
+		const end = encode(words.slice(-4).join(" "));
+		fragmentParams = `${start},${end}`;
+	} else {
+		fragmentParams = encode(cleanText);
+	}
+
+	return `${fragmentParams}`;
+}

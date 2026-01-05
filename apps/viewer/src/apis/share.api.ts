@@ -5,6 +5,7 @@ export const fetchAnnotations = async (shareId: string) => {
 		.from("annotations")
 		.select()
 		.eq("share_id", shareId);
+
 	if (fetchError) throw fetchError;
 
 	return annotations;
