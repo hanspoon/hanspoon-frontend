@@ -1,10 +1,14 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useNavigate } from "react-router";
+import { useLocation, useMatch, useNavigate } from "react-router";
 import { userInfoQueryOptions } from "../../queries/userInfo";
 
 export const Profile = () => {
 	const { data: userInfo } = useSuspenseQuery(userInfoQueryOptions);
+
 	const navigate = useNavigate();
+	const pathname = useLocation().pathname;
+	const isProfileMatch = useMatch("/:username");
+	const shouldShowEditButton = isProfileMatch && pathname !== "/edit";
 
 	if (!userInfo) return null;
 
@@ -36,11 +40,13 @@ export const Profile = () => {
 				<br />
 				구독해주세요.haebom@kakao.com
 			</p>
-			<div>
-				<button type="button" onClick={() => navigate("/edit")}>
-					Edit
-				</button>
-			</div>
+			{shouldShowEditButton && (
+				<div>
+					<button type="button" onClick={() => navigate("/edit")}>
+						Edit
+					</button>
+				</div>
+			)}
 		</section>
 	);
 };
