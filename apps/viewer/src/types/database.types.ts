@@ -23,7 +23,7 @@ export type Database = {
           post_id: string
           share_id: string | null
           start_meta: Json
-          text: string | null
+          text: string
           updated_at: string
           user_id: string | null
         }
@@ -35,7 +35,7 @@ export type Database = {
           post_id: string
           share_id?: string | null
           start_meta: Json
-          text?: string | null
+          text: string
           updated_at?: string
           user_id?: string | null
         }
@@ -47,7 +47,7 @@ export type Database = {
           post_id?: string
           share_id?: string | null
           start_meta?: Json
-          text?: string | null
+          text?: string
           updated_at?: string
           user_id?: string | null
         }
