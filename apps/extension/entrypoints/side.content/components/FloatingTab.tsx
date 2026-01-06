@@ -5,11 +5,14 @@ import { HanspoonFloatingButton } from "./floating-button/haspoon-floating-butto
 import { ShareFloatingButton } from "./floating-button/share-floating-button";
 import { SidePanel } from "./side-panel/SidePanel";
 
+export type TabType = "share" | "hanspoon";
+
 export const FloatingTab = () => {
 	const { yRatio, isDragging, hasMoved, handleMouseDown } = useDrag(0.5);
 	const { isOpen, sideWidth, setIsOpen } = useSidePanel(400);
 
 	const [isHovered, setIsHovered] = useState(false);
+	const [activeTab, setActiveTab] = useState<TabType>("hanspoon");
 
 	return (
 		<div style={{ fontFamily: "system-ui" }}>
@@ -33,8 +36,11 @@ export const FloatingTab = () => {
 				<ShareFloatingButton
 					isHovered={isHovered}
 					isOpen={isOpen}
-					setIsOpen={setIsOpen}
 					hasMoved={hasMoved}
+					onClick={() => {
+						setActiveTab("share");
+						setIsOpen(true);
+					}}
 				/>
 
 				<HanspoonFloatingButton
@@ -42,12 +48,22 @@ export const FloatingTab = () => {
 					handleMouseDown={handleMouseDown}
 					isDragging={isDragging}
 					isOpen={isOpen}
-					setIsOpen={setIsOpen}
 					hasMoved={hasMoved}
+					onClick={() => {
+						if (!hasMoved) {
+							setActiveTab("hanspoon");
+							setIsOpen(!isOpen);
+						}
+					}}
 				/>
 			</div>
 
-			<SidePanel sideWidth={sideWidth} isOpen={isOpen} setIsOpen={setIsOpen} />
+			<SidePanel
+				sideWidth={sideWidth}
+				isOpen={isOpen}
+				setIsOpen={setIsOpen}
+				activeTab={activeTab}
+			/>
 		</div>
 	);
 };

@@ -1,25 +1,29 @@
 interface HanspoonFloatingButtonProps {
 	handleMouseDown: (e: React.MouseEvent) => void;
-	setIsOpen: (value: boolean) => void;
 	isDragging: boolean;
 	isOpen: boolean;
 	isHover: boolean;
 	hasMoved: boolean;
+	onClick: () => void;
 }
 
 export const HanspoonFloatingButton = ({
 	handleMouseDown,
-	setIsOpen,
 	isDragging,
 	isOpen,
 	isHover,
 	hasMoved,
+	onClick,
 }: HanspoonFloatingButtonProps) => {
 	return (
 		<div>
 			<button
 				type="button"
-				onClick={() => setIsOpen(false)}
+				onClick={() => {
+					if (!hasMoved && isOpen) {
+						onClick();
+					}
+				}}
 				style={{
 					width: "12px",
 					height: "12px",
@@ -44,11 +48,7 @@ export const HanspoonFloatingButton = ({
 			<button
 				type="button"
 				onMouseDown={handleMouseDown}
-				onClick={() => {
-					if (!hasMoved) {
-						setIsOpen(!isOpen);
-					}
-				}}
+				onClick={onClick}
 				style={{
 					width: "60px",
 					height: "40px",

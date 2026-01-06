@@ -1,22 +1,22 @@
 interface ShareFloatingButtonInterface {
 	isHovered: boolean;
 	isOpen: boolean;
-	setIsOpen: (value: boolean) => void;
 	hasMoved: boolean;
+	onClick: () => void;
 }
 
 export const ShareFloatingButton = ({
 	isHovered,
 	isOpen,
-	setIsOpen,
 	hasMoved,
+	onClick,
 }: ShareFloatingButtonInterface) => {
 	return (
 		<button
 			type="button"
 			onClick={() => {
 				if (!hasMoved) {
-					setIsOpen(!isOpen);
+					onClick();
 				}
 			}}
 			style={{

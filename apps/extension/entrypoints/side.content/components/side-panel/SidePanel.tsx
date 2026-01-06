@@ -1,10 +1,18 @@
+import type { TabType } from "../FloatingTab";
+
 interface SidePanelProps {
 	sideWidth: number;
 	isOpen: boolean;
 	setIsOpen: (value: boolean) => void;
+	activeTab: TabType;
 }
 
-export const SidePanel = ({ sideWidth, isOpen, setIsOpen }: SidePanelProps) => {
+export const SidePanel = ({
+	sideWidth,
+	isOpen,
+	setIsOpen,
+	activeTab,
+}: SidePanelProps) => {
 	return (
 		<div
 			style={{
@@ -33,7 +41,7 @@ export const SidePanel = ({ sideWidth, isOpen, setIsOpen }: SidePanelProps) => {
 				}}
 			>
 				<h2 style={{ margin: 0, fontSize: "18px", fontWeight: 600 }}>
-					Side Panel
+					{activeTab === "share" ? "Share Panel" : "Hanspoon Panel"}
 				</h2>
 				<button
 					type="button"
@@ -57,7 +65,9 @@ export const SidePanel = ({ sideWidth, isOpen, setIsOpen }: SidePanelProps) => {
 					overflowY: "auto",
 				}}
 			>
-				한스푼입니다.
+				{activeTab === "share"
+					? "ShareFloatingButton입니다."
+					: "HanspoonFloatingButton입니다."}
 			</div>
 		</div>
 	);
