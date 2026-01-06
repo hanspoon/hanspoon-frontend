@@ -6,42 +6,42 @@ export const FloatingTab = () => {
 	const [isOpen, setIsOpen] = useState(false);
 	const [sideWidth] = useState(400);
 	const [isHovered, setIsHovered] = useState(false);
-	const [position, setPosition] = useState({ top: 300, right: 0 });
+	const [position, setPosition] = useState(0.5);
 	const [isDragging, setIsDragging] = useState(false);
-	const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+	const initialClientYRef = useRef(0);
+	const initialPositionRef = useRef(0);
+	const [hasMoved, setHasMoved] = useState(false);
 
 	useEffect(() => {
+		if (!isDragging) return;
+
 		const handleMouseMove = (e: MouseEvent) => {
-			if (!isDragging) return;
-
-			const deltaX = e.clientX - dragStart.x;
-			const deltaY = e.clientY - dragStart.y;
-
-			setPosition((prev) => ({
-				top: Math.max(0, Math.min(window.innerHeight - 100, prev.top + deltaY)),
-				right: Math.max(
-					0,
-					Math.min(window.innerWidth - 100, prev.right - deltaX),
+			const initialY = initialPositionRef.current * window.innerHeight;
+			const deltaY = e.clientY - initialClientYRef.current;
+			const newY = Math.max(
+				30,
+				Math.min(
+					window.innerHeight - 200,
+					initialY + deltaY,
 				),
-			}));
-
-			setDragStart({ x: e.clientX, y: e.clientY });
+			);
+			const newPosition = newY / window.innerHeight;
+			setPosition(newPosition);
 		};
 
 		const handleMouseUp = () => {
 			setIsDragging(false);
+			setTimeout(() => setHasMoved(false), 100);
 		};
 
-		if (isDragging) {
-			document.addEventListener("mousemove", handleMouseMove);
-			document.addEventListener("mouseup", handleMouseUp);
-		}
+		document.addEventListener("mousemove", handleMouseMove);
+		document.addEventListener("mouseup", handleMouseUp);
 
 		return () => {
 			document.removeEventListener("mousemove", handleMouseMove);
 			document.removeEventListener("mouseup", handleMouseUp);
 		};
-	}, [isDragging, dragStart]);
+	}, [isDragging]);
 
 	useEffect(() => {
 		const styleId = "side-panel-page-shrink";
@@ -73,9 +73,29 @@ export const FloatingTab = () => {
 		};
 	}, [isOpen, sideWidth]);
 
-	const handleMouseDown = (e: React.MouseEvent) => {
+	const handleButtonDragStart = (e: React.MouseEvent) => {
+		initialClientYRef.current = e.clientY;
+		initialPositionRef.current = position;
 		setIsDragging(true);
-		setDragStart({ x: e.clientX, y: e.clientY });
+
+		let moved = false;
+		const handleMouseMove = (moveEvent: MouseEvent) => {
+			if (Math.abs(moveEvent.clientY - e.clientY) > 5) {
+				moved = true;
+				setHasMoved(true);
+			}
+		};
+
+		const handleMouseUp = () => {
+			document.removeEventListener("mousemove", handleMouseMove);
+			document.removeEventListener("mouseup", handleMouseUp);
+			if (!moved) {
+				setIsDragging(false);
+			}
+		};
+
+		document.addEventListener("mousemove", handleMouseMove);
+		document.addEventListener("mouseup", handleMouseUp);
 	};
 
 	return (
@@ -86,24 +106,26 @@ export const FloatingTab = () => {
 				onMouseLeave={() => setIsHovered(false)}
 				style={{
 					position: "fixed",
-					top: `${position.top}px`,
-					right: `${position.right}px`,
+					top: `${position * 100}vh`,
+					right: isOpen ? `${sideWidth + 20}px` : "0px",
 					display: "flex",
 					flexDirection: "column",
 					alignItems: "flex-end",
 					gap: "12px",
 					zIndex: 2147483646,
 					cursor: isDragging ? "grabbing" : "grab",
+					transition: isDragging ? "none" : "right 0.3s ease",
 				}}
 			>
 				<LibraryFloatingButton isHovered={isHovered} />
 
 				<HanspoonFloatingButton
 					isHover={isHovered}
-					handleMouseDown={() => handleMouseDown}
+					handleMouseDown={handleButtonDragStart}
 					setIsOpen={setIsOpen}
 					isDragging={isDragging}
 					isOpen={isOpen}
+					hasMoved={hasMoved}
 				/>
 			</div>
 
