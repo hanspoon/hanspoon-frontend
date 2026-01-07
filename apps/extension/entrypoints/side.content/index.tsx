@@ -1,3 +1,4 @@
+import { Provider } from "jotai";
 import ReactDOM from "react-dom/client";
 import { FloatingTab } from "./components/FloatingTab";
 
@@ -15,7 +16,11 @@ export default defineContentScript({
 				container.appendChild(wrapper);
 
 				const root = ReactDOM.createRoot(wrapper);
-				root.render(<FloatingTab />);
+				root.render(
+					<Provider>
+						<FloatingTab />
+					</Provider>,
+				);
 
 				return { root, wrapper };
 			},
