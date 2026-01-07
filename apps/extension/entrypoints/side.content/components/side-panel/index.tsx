@@ -1,4 +1,8 @@
+import { useCurrentPost } from "../../hooks/useCurrentPost";
 import type { TabType } from "../FloatingTab";
+import { CurrentPost } from "./CurrentPost";
+import { SidePanelFooter } from "./SidePanelFooter";
+import { SidePanelHeader } from "./SidePanelHeader";
 import { SidePanelPostList } from "./SidePanelPostList";
 
 interface SidePanelProps {
@@ -14,6 +18,8 @@ export const SidePanel = ({
 	setIsOpen,
 	activeTab,
 }: SidePanelProps) => {
+	const { currentPost } = useCurrentPost();
+
 	return (
 		<div
 			style={{
@@ -32,46 +38,23 @@ export const SidePanel = ({
 				borderLeft: "1px solid #e5e7eb",
 			}}
 		>
-			<div
-				style={{
-					padding: "20px",
-					borderBottom: "1px solid #e5e7eb",
-					display: "flex",
-					justifyContent: "space-between",
-					alignItems: "center",
-				}}
-			>
-				<h2 style={{ margin: 0, fontSize: "18px", fontWeight: 600 }}>
-					{activeTab === "share" ? "Share Panel" : "Hanspoon Panel"}
-				</h2>
-				<button
-					type="button"
-					onClick={() => setIsOpen(false)}
-					style={{
-						background: "none",
-						border: "none",
-						fontSize: "24px",
-						cursor: "pointer",
-						color: "#6b7280",
-					}}
-				>
-					✕
-				</button>
-			</div>
+			<SidePanelHeader setIsOpen={setIsOpen} />
 
 			<div
 				style={{
 					flex: 1,
 					padding: "20px",
-					overflowY: "auto",
+					overflowY: "hidden",
+					display: "flex",
+					flexDirection: "column",
+					gap: "16px",
 				}}
 			>
-				{activeTab === "share" ? (
-					<div>ShareFloatingButton입니다.</div>
-				) : (
-					<SidePanelPostList />
-				)}
+				{currentPost && <CurrentPost currentPost={currentPost} />}
+
+				{activeTab === "hanspoon" && <SidePanelPostList />}
 			</div>
+			<SidePanelFooter />
 		</div>
 	);
 };

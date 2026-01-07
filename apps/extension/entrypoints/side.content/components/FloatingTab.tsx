@@ -4,7 +4,7 @@ import { useFloatingButtonConfig } from "../hooks/useFloatingButtonConfig";
 import { useSidePanel } from "../hooks/useSidePanel";
 import { HanspoonFloatingButton } from "./floating-button/haspoon-floating-button";
 import { ShareFloatingButton } from "./floating-button/share-floating-button";
-import { SidePanel } from "./side-panel/SidePanel";
+import { SidePanel } from "./side-panel";
 
 export type TabType = "share" | "hanspoon";
 

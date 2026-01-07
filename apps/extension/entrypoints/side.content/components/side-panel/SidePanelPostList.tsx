@@ -1,5 +1,6 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { getAllPosts } from "@/apis/fetcher";
+import { PostCard } from "./PostCard";
 
 export const SidePanelPostList = () => {
 	const allPosts = useLiveQuery(getAllPosts);
@@ -27,86 +28,35 @@ export const SidePanelPostList = () => {
 			style={{
 				display: "flex",
 				flexDirection: "column",
-				gap: "12px",
+				height: "100%",
 			}}
 		>
-			{allPosts.map((post) => (
-				/** biome-ignore lint/a11y/useKeyWithClickEvents: Post card click handler */
-				/** biome-ignore lint/a11y/noStaticElementInteractions: Post card clickable */
+			<div
+				style={{
+					flex: 1,
+					overflowY: "auto",
+					marginBottom: "20px",
+				}}
+			>
 				<div
-					key={post.id}
 					style={{
-						padding: "16px",
-						border: "1px solid #e5e7eb",
-						borderRadius: "8px",
-						cursor: "pointer",
-						transition: "all 0.2s",
-						backgroundColor: "white",
-					}}
-					onMouseEnter={(e) => {
-						e.currentTarget.style.backgroundColor = "#f9fafb";
-						e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.1)";
-					}}
-					onMouseLeave={(e) => {
-						e.currentTarget.style.backgroundColor = "white";
-						e.currentTarget.style.boxShadow = "none";
-					}}
-					onClick={() => {
-						window.open(post.url, "_blank");
+						display: "flex",
+						flexDirection: "column",
+						gap: "8px",
 					}}
 				>
 					<div
 						style={{
-							display: "flex",
-							alignItems: "center",
-							gap: "8px",
-							marginBottom: "8px",
+							fontSize: "14px",
 						}}
 					>
-						{post.favIconUrl && (
-							<img
-								src={post.favIconUrl}
-								alt=""
-								style={{
-									width: "16px",
-									height: "16px",
-									borderRadius: "2px",
-								}}
-							/>
-						)}
-						<div
-							style={{
-								fontSize: "12px",
-								color: "#6b7280",
-							}}
-						>
-							{post.sourceDomain}
-						</div>
+						모든 포스트
 					</div>
-					<div
-						style={{
-							fontSize: "16px",
-							fontWeight: "600",
-							marginBottom: "8px",
-							color: "#111827",
-						}}
-					>
-						{post.title}
-					</div>
-					<div
-						style={{
-							fontSize: "12px",
-							color: "#9ca3af",
-						}}
-					>
-						{new Date(post.updatedAt).toLocaleDateString("ko-KR", {
-							year: "numeric",
-							month: "long",
-							day: "numeric",
-						})}
-					</div>
+					{allPosts.map((post) => (
+						<PostCard key={post.id} post={post} />
+					))}
 				</div>
-			))}
+			</div>
 		</div>
 	);
 };
