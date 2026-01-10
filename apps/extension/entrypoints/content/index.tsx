@@ -14,13 +14,22 @@ export default defineContentScript({
 			if (message.type === "HIGHLIGHT_ADDED") {
 				window.dispatchEvent(
 					new CustomEvent("highlight-sync", {
-						detail: { action: "added", ...message.data },
+						detail: {
+							action: "added",
+							highlightId: message.data.highlightId,
+							postId: message.data.postId,
+							timestamp: message.data.timestamp,
+						},
 					}),
 				);
 			} else if (message.type === "HIGHLIGHT_DELETED") {
 				window.dispatchEvent(
 					new CustomEvent("highlight-sync", {
-						detail: { action: "deleted", ...message.data },
+						detail: {
+							action: "deleted",
+							highlightId: message.data.highlightId,
+							timestamp: message.data.timestamp,
+						},
 					}),
 				);
 			}

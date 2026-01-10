@@ -51,7 +51,7 @@ const addPostBackground = async (data: LocalPost) => {
 const broadcastToAllTabs = async (
 	message: {
 		type: string;
-		data: { highlightId: string; postId?: string };
+		data: { highlightId: string; postId?: string; timestamp?: number };
 	},
 	excludeTabId?: number,
 ) => {
@@ -74,7 +74,11 @@ export default defineBackground({
 			await broadcastToAllTabs(
 				{
 					type: "HIGHLIGHT_ADDED",
-					data: { highlightId: data.id, postId },
+					data: {
+						highlightId: data.id,
+						postId,
+						timestamp: performance.timeOrigin + performance.now(),
+					},
 				},
 				message.sender.tab?.id,
 			);
@@ -89,7 +93,10 @@ export default defineBackground({
 			await broadcastToAllTabs(
 				{
 					type: "HIGHLIGHT_DELETED",
-					data: { highlightId: id },
+					data: {
+						highlightId: id,
+						timestamp: performance.timeOrigin + performance.now(),
+					},
 				},
 				message.sender.tab?.id,
 			);
