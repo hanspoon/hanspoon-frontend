@@ -48,16 +48,18 @@ const addPostBackground = async (data: LocalPost) => {
 	await db.posts.add(data);
 };
 
-const broadcastToAllTabs = async (message: {
-	type: string;
-	data: { highlightId: string; postId?: string };
-}) => {
+const broadcastToAllTabs = async (
+	message: {
+		type: string;
+		data: { highlightId: string; postId?: string };
+	},
+	excludeTabId?: number,
+) => {
 	const tabs = await browser.tabs.query({});
 
 	tabs.forEach((tab) => {
-		if (tab.id) {
-			browser.tabs.sendMessage(tab.id, message).catch(() => {
-			});
+		if (tab.id && tab.id !== excludeTabId) {
+			browser.tabs.sendMessage(tab.id, message).catch(() => {});
 		}
 	});
 };
@@ -69,10 +71,13 @@ export default defineBackground({
 			const { data, postId } = message.data;
 			await addHightLightBackground({ data, postId });
 
-			await broadcastToAllTabs({
-				type: "HIGHLIGHT_ADDED",
-				data: { highlightId: data.id, postId },
-			});
+			await broadcastToAllTabs(
+				{
+					type: "HIGHLIGHT_ADDED",
+					data: { highlightId: data.id, postId },
+				},
+				message.sender.tab?.id,
+			);
 
 			return { success: true };
 		});
@@ -81,10 +86,13 @@ export default defineBackground({
 			const { id } = message.data;
 			await deleteHighlightBackground(id);
 
-			await broadcastToAllTabs({
-				type: "HIGHLIGHT_DELETED",
-				data: { highlightId: id },
-			});
+			await broadcastToAllTabs(
+				{
+					type: "HIGHLIGHT_DELETED",
+					data: { highlightId: id },
+				},
+				message.sender.tab?.id,
+			);
 
 			return { success: true };
 		});
