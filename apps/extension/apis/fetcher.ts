@@ -3,6 +3,8 @@ import type {
 	LocalPost,
 	SerializedHighlight,
 } from "@/lib/highlight/types";
+import { notifyHighlightChange } from "@/lib/metrics/syncMetrics";
+import { db } from "@/models/db";
 
 export const saveHighlight = async ({
 	data,
@@ -11,53 +13,64 @@ export const saveHighlight = async ({
 	data: SerializedHighlight;
 	postId: string;
 }) => {
-	const response = await sendMessage("DB_SAVE_HIGHLIGHT", { data, postId });
+	const annotation: LocalAnnotation = {
+		...data,
+		postId: postId,
+		createdAt: Date.now(),
+		updatedAt: Date.now(),
+		shareId: crypto.randomUUID(),
+		isSynced: false,
+	};
 
-	if (!response?.success) {
-		throw new Error(`DB Error: Highlight save failed`);
-	}
+	await db.annotations.add(annotation);
+
+	await notifyHighlightChange({
+		id: data.id,
+		postId,
+		action: "HIGHLIGHT_ADDED",
+	});
 
 	return { postId };
 };
 
 export const deleteHighlight = async (id: string) => {
-	const response = await sendMessage("DB_DELETE_HIGHLIGHT", { id });
-	if (!response?.success) {
-		throw new Error(`DB Error: Highlight delete failed`);
+	const annotation = await db.annotations.get(id);
+	if (!annotation) {
+		throw new Error(`DB Error: Highlight not found`);
 	}
+
+	await db.annotations.delete(id);
+
+	await notifyHighlightChange({
+		id,
+		postId: annotation.postId,
+		action: "HIGHLIGHT_DELETED",
+	});
 };
 
 export const getAllHighlights = async (): Promise<
 	LocalAnnotation[] | undefined
 > => {
-	const highlights = await sendMessage("DB_GET_ALL_HIGHLIGHTS", undefined);
-	return highlights;
+	return await db.annotations.toArray();
 };
 
 export const getAllPosts = async (): Promise<LocalPost[] | undefined> => {
-	const allPosts = await sendMessage("DB_GET_ALL_POSTS", undefined);
-	return allPosts;
+	return await db.posts.toArray();
 };
 
 export const getPostById = async (
 	id: string,
 ): Promise<LocalPost | undefined> => {
-	const post = await sendMessage("DB_GET_POST_BY_ID", { postId: id });
-	return post;
+	return await db.posts.get(id);
 };
 
 export const getPostByUrl = async (
 	url: string,
 ): Promise<LocalPost | undefined> => {
-	const post = await sendMessage("DB_GET_POST_BY_URL", { url });
-	return post;
+	return await db.posts.where("url").equals(url).first();
 };
 
 export const addPost = async (data: LocalPost) => {
-	const response = await sendMessage("DB_ADD_POST", { postData: data });
-	if (!response?.success) {
-		throw new Error(`DB Error: Post add failed`);
-	}
-
+	await db.posts.add(data);
 	return data;
 };
