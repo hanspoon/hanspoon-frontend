@@ -39,16 +39,17 @@ export const CreationModeUI = ({
 					try {
 						const post = await ensurePostbyUrl(window.location.href);
 
-						const { postId } = await saveHighlight({
+						const highlightId = generateId();
+						await saveHighlight({
 							data: serializeRange({
 								range,
-								id: generateId(),
+								id: highlightId,
 								$root: document.body,
 							}),
 							postId: post.id,
 						});
 
-						appendHighlightTag(range, postId);
+						appendHighlightTag(range, highlightId);
 					} catch (error) {
 						console.error("Failed to save highlight:", error);
 					}
