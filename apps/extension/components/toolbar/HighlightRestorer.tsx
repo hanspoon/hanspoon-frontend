@@ -1,15 +1,40 @@
 import { useLiveQuery } from "dexie-react-hooks";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { getAllHighlights } from "@/apis/fetcher";
+import { getBroadcastChannel } from "@/lib/broadcast/channel";
 import { deserializeRange } from "@/lib/highlight/deserialization";
 import { appendHighlightTag } from "@/lib/highlight/highlight";
 import type { SerializedHighlight } from "@/lib/highlight/types";
 
 export function HighlightRestorer() {
-	const allHighlights = useLiveQuery(getAllHighlights);
+	const [syncTrigger, setSyncTrigger] = useState(0);
+	const allHighlights = useLiveQuery(getAllHighlights, [syncTrigger]);
+
+	useEffect(() => {
+		const channel = getBroadcastChannel();
+
+		channel.onMessage((message) => {
+			console.log("📡 BroadcastChannel message received:", message);
+			setSyncTrigger((prev) => prev + 1);
+		});
+
+		return () => {
+		};
+	}, []);
+
 
 	useEffect(() => {
 		if (!allHighlights || allHighlights.length === 0) return;
+
+		const existingHighlights = document.querySelectorAll("[data-highlight-id]");
+		existingHighlights.forEach((el) => {
+			const parent = el.parentNode;
+			if (parent) {
+				const textNode = document.createTextNode(el.textContent || "");
+				parent.replaceChild(textNode, el);
+				parent.normalize();
+			}
+		});
 
 		try {
 			allHighlights.forEach((data: SerializedHighlight) => {

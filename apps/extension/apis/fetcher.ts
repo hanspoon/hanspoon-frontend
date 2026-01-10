@@ -1,3 +1,4 @@
+import { getBroadcastChannel } from "@/lib/broadcast/channel";
 import type {
 	LocalAnnotation,
 	LocalPost,
@@ -17,6 +18,12 @@ export const saveHighlight = async ({
 		throw new Error(`DB Error: Highlight save failed`);
 	}
 
+	getBroadcastChannel().postMessage({
+		type: "HIGHLIGHT_ADDED",
+		id: data.id,
+		postId,
+	});
+
 	return { postId };
 };
 
@@ -25,6 +32,11 @@ export const deleteHighlight = async (id: string) => {
 	if (!response?.success) {
 		throw new Error(`DB Error: Highlight delete failed`);
 	}
+
+	getBroadcastChannel().postMessage({
+		type: "HIGHLIGHT_DELETED",
+		id,
+	});
 };
 
 export const getAllHighlights = async (): Promise<
