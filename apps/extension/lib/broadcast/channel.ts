@@ -1,8 +1,13 @@
 export const CHANNEL_NAME = "hanspoon-highlights";
 
 export type HighlightSyncMessage =
-	| { type: "HIGHLIGHT_ADDED"; id: string; postId: string }
-	| { type: "HIGHLIGHT_DELETED"; id: string };
+	| {
+			type: "HIGHLIGHT_ADDED";
+			id: string;
+			postId: string;
+			timestamp: number;
+	  }
+	| { type: "HIGHLIGHT_DELETED"; id: string; timestamp: number };
 
 class HighlightBroadcastChannel {
 	private channel: BroadcastChannel;

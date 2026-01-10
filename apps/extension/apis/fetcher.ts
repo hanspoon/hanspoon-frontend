@@ -22,6 +22,7 @@ export const saveHighlight = async ({
 		type: "HIGHLIGHT_ADDED",
 		id: data.id,
 		postId,
+		timestamp: performance.timeOrigin + performance.now(),
 	});
 
 	return { postId };
@@ -36,6 +37,7 @@ export const deleteHighlight = async (id: string) => {
 	getBroadcastChannel().postMessage({
 		type: "HIGHLIGHT_DELETED",
 		id,
+		timestamp: performance.timeOrigin + performance.now(),
 	});
 };
 
