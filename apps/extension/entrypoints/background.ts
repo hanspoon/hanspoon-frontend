@@ -48,18 +48,44 @@ const addPostBackground = async (data: LocalPost) => {
 	await db.posts.add(data);
 };
 
+const broadcastToAllTabs = async (message: {
+	type: string;
+	data: { highlightId: string; postId?: string };
+}) => {
+	const tabs = await browser.tabs.query({});
+
+	tabs.forEach((tab) => {
+		if (tab.id) {
+			browser.tabs.sendMessage(tab.id, message).catch(() => {
+			});
+		}
+	});
+};
+
 export default defineBackground({
 	type: "module",
 	main() {
 		onMessage("DB_SAVE_HIGHLIGHT", async (message) => {
 			const { data, postId } = message.data;
 			await addHightLightBackground({ data, postId });
+
+			await broadcastToAllTabs({
+				type: "HIGHLIGHT_ADDED",
+				data: { highlightId: data.id, postId },
+			});
+
 			return { success: true };
 		});
 
 		onMessage("DB_DELETE_HIGHLIGHT", async (message) => {
 			const { id } = message.data;
 			await deleteHighlightBackground(id);
+
+			await broadcastToAllTabs({
+				type: "HIGHLIGHT_DELETED",
+				data: { highlightId: id },
+			});
+
 			return { success: true };
 		});
 
