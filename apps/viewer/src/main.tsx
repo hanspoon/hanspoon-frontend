@@ -9,6 +9,7 @@ import { ProtectedRoute } from "./components/auth/ProtectedRoute.tsx";
 import "./index.css";
 import { ProfileEditPage } from "./pages/profile/[id]/edit.tsx";
 import { ProfilePage } from "./pages/profile/[id]/index.tsx";
+import { SharedPage } from "./pages/SharedPage.tsx";
 import SharePage from "./pages/SharePage.tsx";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,7 @@ if (rootElement) {
 						</Route>
 
 						<Route path="/share/:shareId" element={<SharePage />} />
+						<Route path="/shared/:shareId" element={<SharedPage />} />
 					</Routes>
 				</BrowserRouter>
 				<ReactQueryDevtools initialIsOpen={true} />
