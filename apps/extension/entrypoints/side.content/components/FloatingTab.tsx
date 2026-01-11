@@ -3,7 +3,6 @@ import { useDrag } from "../hooks/useDrag";
 import { useFloatingButtonConfig } from "../hooks/useFloatingButtonConfig";
 import { useSidePanel } from "../hooks/useSidePanel";
 import { HanspoonFloatingButton } from "./floating-button/haspoon-floating-button";
-import { ShareFloatingButton } from "./floating-button/share-floating-button";
 import { SidePanel } from "./side-panel";
 
 export type TabType = "share" | "hanspoon";
@@ -192,14 +191,14 @@ export const FloatingTab = () => {
 					transition: isDragging ? "none" : "right 0.3s ease",
 				}}
 			>
-				<ShareFloatingButton
+				{/* <ShareFloatingButton
 					isHovered={isHovered}
 					hasMoved={hasMoved}
 					onClick={() => {
 						setActiveTab("share");
 						setIsOpen(true);
 					}}
-				/>
+				/> */}
 
 				<HanspoonFloatingButton
 					isHover={isHovered}
