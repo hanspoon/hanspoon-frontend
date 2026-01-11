@@ -1,5 +1,10 @@
 import { createClient, type Session } from "@supabase/supabase-js";
-import { db } from "@/models/db";
+import {
+	getAllHighlightsByPostId,
+	getPostById,
+	updateHighlightsByPostId,
+	updatePost,
+} from "@/apis/fetcher";
 
 const supabase = createClient(
 	import.meta.env.VITE_SUPABASE_URL,
@@ -12,7 +17,7 @@ export async function syncPostToSupabase(
 ) {
 	if (!session) {
 		console.error("로그인 세션이 없습니다! 다시 로그인해주세요.");
-		return;
+		throw new Error("로그인 세션이 없습니다");
 	}
 
 	const { error: sessionError } = await supabase.auth.setSession({
@@ -25,14 +30,13 @@ export async function syncPostToSupabase(
 		return;
 	}
 
-	const post = await db.posts.get(postId);
+	// 포스트
+	const post = await getPostById(postId);
 
-	const annotations = await db.annotations
-		.where("postId")
-		.equals(postId)
-		.toArray();
-
-	if (!post) return;
+	if (!post) {
+		console.error("포스트를 찾을 수 없습니다:", postId);
+		throw new Error("포스트를 찾을 수 없습니다");
+	}
 
 	const { error: postError } = await supabase.from("posts").upsert({
 		id: post.id,
@@ -44,11 +48,14 @@ export async function syncPostToSupabase(
 	});
 
 	if (postError) {
-		console.error("Post 업로드 실패:", postError);
+		console.error("❌ Post 업로드 실패:", postError);
 		throw postError;
 	}
 
-	const annotationsToUpload = annotations.map((ann) => ({
+	// annotation
+	const highlights = await getAllHighlightsByPostId(postId);
+
+	const annotationsToUpload = highlights.map((ann) => ({
 		id: ann.id,
 		post_id: post.id,
 		start_meta: ann.start,
@@ -65,19 +72,12 @@ export async function syncPostToSupabase(
 
 	if (annError) throw annError;
 
-	await db.posts.update(postId, {
+	// isSynced 업데이트
+	await updateHighlightsByPostId(postId, {
 		isSynced: true,
-		shareId: post.shareId,
 	});
 
-	await db.annotations
-		.where("postId")
-		.equals(postId)
-		.modify({ isSynced: true });
-
-	const { data: insertedData } = await supabase
-		.from("annotations")
-		.select("*")
-		.eq("post_id", postId);
-	console.log("Inserted data:", insertedData);
+	await updatePost(postId, {
+		isSynced: true,
+	});
 }
