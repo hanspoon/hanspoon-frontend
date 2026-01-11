@@ -18,7 +18,7 @@ export const SidePanel = ({
 	setIsOpen,
 	activeTab,
 }: SidePanelProps) => {
-	const { currentPost } = useCurrentPost();
+	// const { currentPost } = useCurrentPost();
 
 	return (
 		<div
@@ -50,7 +50,7 @@ export const SidePanel = ({
 					gap: "16px",
 				}}
 			>
-				{currentPost && <CurrentPost currentPost={currentPost} />}
+				{/* {currentPost && <CurrentPost currentPost={currentPost} />} */}
 
 				{activeTab === "hanspoon" && <SidePanelPostList />}
 			</div>
