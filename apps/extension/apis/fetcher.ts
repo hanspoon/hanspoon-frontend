@@ -34,6 +34,28 @@ export const getAllHighlights = async (): Promise<
 	return highlights;
 };
 
+export const getAllHighlightsByPostId = async (
+	id: string,
+): Promise<LocalAnnotation[]> => {
+	const highlights = await sendMessage("DB_GET_ALL_HIGHLIGHTS_BY_ID", {
+		postId: id,
+	});
+	return highlights;
+};
+
+export const updateHighlightsByPostId = async (
+	postId: string,
+	updates: Partial<LocalAnnotation>,
+) => {
+	const response = await sendMessage("DB_UPDATE_ANNOTATIONS_BY_POST_ID", {
+		postId,
+		updates,
+	});
+	if (!response?.success) {
+		throw new Error(`DB Error: Annotation update failed`);
+	}
+};
+
 export const getAllPosts = async (): Promise<LocalPost[] | undefined> => {
 	const allPosts = await sendMessage("DB_GET_ALL_POSTS", undefined);
 	return allPosts;
@@ -60,4 +82,30 @@ export const addPost = async (data: LocalPost) => {
 	}
 
 	return data;
+};
+
+export const updatePost = async (
+	postId: string,
+	updates: Partial<LocalPost>,
+) => {
+	const response = await sendMessage("DB_UPDATE_POST", { postId, updates });
+	if (!response?.success) {
+		throw new Error(`DB Error: Post update failed`);
+	}
+};
+
+export const deletePost = async (postId: string) => {
+	const response = await sendMessage("DB_DELETE_POST", { postId });
+	if (!response?.success) {
+		throw new Error(`DB Error: Post delete failed`);
+	}
+};
+
+export const deleteAnnotationsByPostId = async (postId: string) => {
+	const response = await sendMessage("DB_DELETE_ANNOTATIONS_BY_POST_ID", {
+		postId,
+	});
+	if (!response?.success) {
+		throw new Error(`DB Error: Annotations delete failed`);
+	}
 };
