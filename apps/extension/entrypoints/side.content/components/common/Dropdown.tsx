@@ -4,6 +4,8 @@ export interface DropdownMenuItem {
 	label: string;
 	onClick: () => void;
 	className?: string;
+	disabled?: boolean;
+	icon?: string;
 }
 
 interface DropdownProps {
@@ -35,12 +37,15 @@ export const Dropdown = ({
 		};
 
 		if (isOpen) {
-			document.addEventListener("mousedown", handleClickOutside);
-		}
+			const timer = setTimeout(() => {
+				document.addEventListener("click", handleClickOutside);
+			}, 0);
 
-		return () => {
-			document.removeEventListener("mousedown", handleClickOutside);
-		};
+			return () => {
+				clearTimeout(timer);
+				document.removeEventListener("click", handleClickOutside);
+			};
+		}
 	}, [isOpen]);
 
 	const getPositionStyles = () => {
@@ -57,7 +62,12 @@ export const Dropdown = ({
 
 		switch (position) {
 			case "top-right":
-				return { ...baseStyles, bottom: "100%", right: 10, marginBottom: "8px" };
+				return {
+					...baseStyles,
+					bottom: "100%",
+					right: 10,
+					marginBottom: "8px",
+				};
 			case "top-left":
 				return { ...baseStyles, bottom: "100%", left: 10, marginBottom: "8px" };
 			case "bottom-left":
@@ -82,37 +92,48 @@ export const Dropdown = ({
 
 			{isOpen && (
 				<div style={getPositionStyles()} className={menuClassName}>
-					{items.map((item, index) => (
-						<button
-							key={`${item.label}-${index}`}
-							type="button"
-							onClick={(e) => {
-								e.stopPropagation();
-								item.onClick();
-								setIsOpen(false);
-							}}
-							className={itemClassName}
-							style={{
-								width: "100%",
-								padding: "8px 12px",
-								textAlign: "left",
-								backgroundColor: "transparent",
-								border: "none",
-								borderRadius: "4px",
-								cursor: "pointer",
-								fontSize: "14px",
-								color: "#374151",
-							}}
-							onMouseEnter={(e) => {
-								e.currentTarget.style.backgroundColor = "#f3f4f6";
-							}}
-							onMouseLeave={(e) => {
-								e.currentTarget.style.backgroundColor = "transparent";
-							}}
-						>
-							{item.label}
-						</button>
-					))}
+					{items.map((item, index) => {
+						return (
+							<button
+								key={`${item.label}-${index}`}
+								type="button"
+								onClick={(e) => {
+									e.stopPropagation();
+									if (!item.disabled) {
+										item.onClick();
+										setIsOpen(false);
+									}
+								}}
+								className={itemClassName}
+								disabled={item.disabled}
+								style={{
+									width: "100%",
+									padding: "8px 12px",
+									textAlign: "left",
+									backgroundColor: "transparent",
+									border: "none",
+									borderRadius: "4px",
+									cursor: item.disabled ? "not-allowed" : "pointer",
+									fontSize: "14px",
+									color: item.disabled ? "#9ca3af" : "#374151",
+									opacity: item.disabled ? 0.6 : 1,
+								}}
+								onMouseEnter={(e) => {
+									if (!item.disabled) {
+										e.currentTarget.style.backgroundColor = "#f3f4f6";
+									}
+								}}
+								onMouseLeave={(e) => {
+									e.currentTarget.style.backgroundColor = "transparent";
+								}}
+							>
+								{item.icon && (
+									<span style={{ marginRight: "8px" }}>{item.icon}</span>
+								)}
+								{item.label}
+							</button>
+						);
+					})}
 				</div>
 			)}
 		</div>
