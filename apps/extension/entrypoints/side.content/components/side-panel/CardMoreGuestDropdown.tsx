@@ -1,7 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import type { LocalPost } from "@/lib/highlight/types";
 import {
-	deleteAnnotationsByPostId,
+	deleteAllHighlightsByPostId,
 	deletePost,
 } from "../../../../apis/fetcher";
 import menuDots from "../../../../public/menu-dots.svg";
@@ -53,7 +53,7 @@ export const CardMoreGuestDropdown = ({ post }: CardMoreGuestDropdownProps) => {
 		}
 
 		try {
-			await deleteAnnotationsByPostId(post.id);
+			await deleteAllHighlightsByPostId(post.id);
 			await deletePost(post.id);
 
 			alert("포스트가 삭제되었습니다.");

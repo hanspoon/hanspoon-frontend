@@ -190,7 +190,7 @@ export default defineBackground({
 			return { success: true };
 		});
 
-		onMessage("DB_DELETE_ANNOTATIONS_BY_POST_ID", async (message) => {
+		onMessage("DB_DELETE_ALL_HIGHLIGHTS_BY_POST_ID", async (message) => {
 			const { postId } = message.data;
 			await deleteAnnotationsByPostIdBackground(postId);
 

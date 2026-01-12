@@ -4,6 +4,7 @@ import type {
 	SerializedHighlight,
 } from "@/lib/highlight/types";
 
+// 하이라이트
 export const saveHighlight = async ({
 	data,
 	postId,
@@ -56,27 +57,44 @@ export const updateHighlightsByPostId = async (
 	}
 };
 
+export const deleteAllHighlightsByPostId = async (postId: string) => {
+	const response = await sendMessage("DB_DELETE_ALL_HIGHLIGHTS_BY_POST_ID", {
+		postId,
+	});
+	if (!response?.success) {
+		throw new Error(`DB Error: Annotations delete failed`);
+	}
+};
+
+// 포스트
 export const getAllPosts = async (): Promise<LocalPost[] | undefined> => {
 	const allPosts = await sendMessage("DB_GET_ALL_POSTS", undefined);
 	return allPosts;
 };
 
-export const getPostById = async (
-	id: string,
-): Promise<LocalPost | undefined> => {
+export const getPostById = async (id: string): Promise<LocalPost> => {
 	const post = await sendMessage("DB_GET_POST_BY_ID", { postId: id });
+
+	if (post === undefined) {
+		throw Error(`DB Error: getPostById failed`);
+	}
+
 	return post;
 };
 
-export const getPostByUrl = async (
-	url: string,
-): Promise<LocalPost | undefined> => {
+export const getPostByUrl = async (url: string): Promise<LocalPost> => {
 	const post = await sendMessage("DB_GET_POST_BY_URL", { url });
+
+	if (post === undefined) {
+		throw Error(`DB Error: getPostByUrl failed`);
+	}
+
 	return post;
 };
 
 export const addPost = async (data: LocalPost) => {
 	const response = await sendMessage("DB_ADD_POST", { postData: data });
+
 	if (!response?.success) {
 		throw new Error(`DB Error: Post add failed`);
 	}
@@ -98,14 +116,5 @@ export const deletePost = async (postId: string) => {
 	const response = await sendMessage("DB_DELETE_POST", { postId });
 	if (!response?.success) {
 		throw new Error(`DB Error: Post delete failed`);
-	}
-};
-
-export const deleteAnnotationsByPostId = async (postId: string) => {
-	const response = await sendMessage("DB_DELETE_ANNOTATIONS_BY_POST_ID", {
-		postId,
-	});
-	if (!response?.success) {
-		throw new Error(`DB Error: Annotations delete failed`);
 	}
 };

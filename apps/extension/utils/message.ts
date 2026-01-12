@@ -20,10 +20,13 @@ export interface DBProtocolMap {
 		success: boolean;
 	};
 	DB_DELETE_POST: (data: { postId: string }) => { success: boolean };
-	DB_DELETE_ANNOTATIONS_BY_POST_ID: (data: { postId: string }) => {
+	DB_DELETE_ALL_HIGHLIGHTS_BY_POST_ID: (data: { postId: string }) => {
 		success: boolean;
 	};
-	DB_UPDATE_ANNOTATIONS_BY_POST_ID: (data: { postId: string; updates: Partial<LocalAnnotation> }) => {
+	DB_UPDATE_ANNOTATIONS_BY_POST_ID: (data: {
+		postId: string;
+		updates: Partial<LocalAnnotation>;
+	}) => {
 		success: boolean;
 	};
 }

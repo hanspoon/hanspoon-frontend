@@ -2,7 +2,7 @@ import { useState } from "react";
 import { syncPostToSupabase } from "@/lib/highlight/syncPostToSupabase";
 import type { LocalPost } from "@/lib/highlight/types";
 import {
-	deleteAnnotationsByPostId,
+	deleteAllHighlightsByPostId,
 	deletePost,
 	updatePost,
 } from "../../../../apis/fetcher";
@@ -75,7 +75,7 @@ export const CardMoreAuthDropdown = ({ post }: CardMoreAuthDropdownProps) => {
 		}
 
 		try {
-			await deleteAnnotationsByPostId(post.id);
+			await deleteAllHighlightsByPostId(post.id);
 			await deletePost(post.id);
 			alert("포스트가 삭제되었습니다.");
 		} catch (error) {
