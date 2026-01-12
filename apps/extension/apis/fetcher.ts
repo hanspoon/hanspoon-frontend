@@ -5,33 +5,48 @@ import type {
 } from "@/lib/highlight/types";
 
 // 하이라이트
-export const saveHighlight = async ({
+export const createHighlight = async ({
 	data,
 	postId,
 }: {
 	data: SerializedHighlight;
 	postId: string;
 }) => {
-	const response = await sendMessage("DB_SAVE_HIGHLIGHT", { data, postId });
+	const response = await sendMessage("DB_CREATE_HIGHLIGHT", { data, postId });
 
 	if (!response?.success) {
-		throw new Error(`DB Error: Highlight save failed`);
+		throw new Error(`[HighlightService] Failed to create: DB_CREATE_HIGHLIGHT`);
 	}
 
 	return { postId };
 };
 
-export const deleteHighlight = async (id: string) => {
-	const response = await sendMessage("DB_DELETE_HIGHLIGHT", { id });
+export const updateAllHighlightsByPostId = async ({
+	postId,
+	updates,
+}: {
+	postId: string;
+	updates: Partial<LocalAnnotation>;
+}) => {
+	const response = await sendMessage("DB_UPDATE_ALL_HIGHLIGHTS_BY_POST_ID", {
+		postId,
+		updates,
+	});
+
 	if (!response?.success) {
-		throw new Error(`DB Error: Highlight delete failed`);
+		throw new Error(
+			`[HighlightService] Failed to update: DB_UPDATE_ALL_HIGHLIGHTS_BY_POST_ID`,
+		);
 	}
 };
 
-export const getAllHighlights = async (): Promise<
-	LocalAnnotation[] | undefined
-> => {
+export const getAllHighlights = async (): Promise<LocalAnnotation[]> => {
 	const highlights = await sendMessage("DB_GET_ALL_HIGHLIGHTS", undefined);
+
+	if (highlights === undefined) {
+		throw new Error(`[HighlightService] Failed to read: DB_GET_ALL_HIGHLIGHTS`);
+	}
+
 	return highlights;
 };
 
@@ -41,19 +56,20 @@ export const getAllHighlightsByPostId = async (
 	const highlights = await sendMessage("DB_GET_ALL_HIGHLIGHTS_BY_ID", {
 		postId: id,
 	});
+
+	if (highlights === undefined) {
+		throw new Error(
+			`[HighlightService] Failed to read: DB_GET_ALL_HIGHLIGHTS_BY_ID`,
+		);
+	}
+
 	return highlights;
 };
 
-export const updateHighlightsByPostId = async (
-	postId: string,
-	updates: Partial<LocalAnnotation>,
-) => {
-	const response = await sendMessage("DB_UPDATE_ALL_HIGHLIGHTS_BY_POST_ID", {
-		postId,
-		updates,
-	});
+export const deleteHighlight = async (id: string) => {
+	const response = await sendMessage("DB_DELETE_HIGHLIGHT", { id });
 	if (!response?.success) {
-		throw new Error(`DB Error: Annotation update failed`);
+		throw new Error(`[HighlightService] Failed to delete: DB_DELETE_HIGHLIGHT`);
 	}
 };
 
@@ -61,22 +77,44 @@ export const deleteAllHighlightsByPostId = async (postId: string) => {
 	const response = await sendMessage("DB_DELETE_ALL_HIGHLIGHTS_BY_POST_ID", {
 		postId,
 	});
+
 	if (!response?.success) {
-		throw new Error(`DB Error: Annotations delete failed`);
+		throw new Error(
+			`[HighlightService] Failed to delete: DB_DELETE_ALL_HIGHLIGHTS_BY_POST_ID`,
+		);
 	}
 };
 
 // 포스트
-export const getAllPosts = async (): Promise<LocalPost[] | undefined> => {
-	const allPosts = await sendMessage("DB_GET_ALL_POSTS", undefined);
-	return allPosts;
+export const createPost = async (data: LocalPost) => {
+	const response = await sendMessage("DB_CREATE_POST", { postData: data });
+
+	if (!response?.success) {
+		throw new Error(`[HighlightService] Failed to create: DB_CREATE_POST`);
+	}
+
+	return data;
+};
+
+export const updatePost = async ({
+	postId,
+	updates,
+}: {
+	postId: string;
+	updates: Partial<LocalPost>;
+}) => {
+	const response = await sendMessage("DB_UPDATE_POST", { postId, updates });
+
+	if (!response?.success) {
+		throw new Error(`[HighlightService] Failed to update: DB_UPDATE_POST`);
+	}
 };
 
 export const getPostById = async (id: string): Promise<LocalPost> => {
 	const post = await sendMessage("DB_GET_POST_BY_ID", { postId: id });
 
 	if (post === undefined) {
-		throw Error(`DB Error: getPostById failed`);
+		throw Error(`[HighlightService] Failed to read: DB_GET_POST_BY_ID`);
 	}
 
 	return post;
@@ -86,35 +124,26 @@ export const getPostByUrl = async (url: string): Promise<LocalPost> => {
 	const post = await sendMessage("DB_GET_POST_BY_URL", { url });
 
 	if (post === undefined) {
-		throw Error(`DB Error: getPostByUrl failed`);
+		throw Error(`[HighlightService] Failed to read: DB_GET_POST_BY_URL`);
 	}
 
 	return post;
 };
 
-export const addPost = async (data: LocalPost) => {
-	const response = await sendMessage("DB_ADD_POST", { postData: data });
+export const getAllPosts = async (): Promise<LocalPost[]> => {
+	const allPosts = await sendMessage("DB_GET_ALL_POSTS");
 
-	if (!response?.success) {
-		throw new Error(`DB Error: Post add failed`);
+	if (allPosts === undefined) {
+		throw Error(`[HighlightService] Failed to read: DB_GET_ALL_POSTS`);
 	}
 
-	return data;
-};
-
-export const updatePost = async (
-	postId: string,
-	updates: Partial<LocalPost>,
-) => {
-	const response = await sendMessage("DB_UPDATE_POST", { postId, updates });
-	if (!response?.success) {
-		throw new Error(`DB Error: Post update failed`);
-	}
+	return allPosts;
 };
 
 export const deletePost = async (postId: string) => {
 	const response = await sendMessage("DB_DELETE_POST", { postId });
+
 	if (!response?.success) {
-		throw new Error(`DB Error: Post delete failed`);
+		throw Error(`[HighlightService] Failed to delete: DB_DELETE_POST`);
 	}
 };

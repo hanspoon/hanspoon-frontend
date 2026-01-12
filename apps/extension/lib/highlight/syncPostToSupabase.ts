@@ -2,7 +2,7 @@ import { createClient, type Session } from "@supabase/supabase-js";
 import {
 	getAllHighlightsByPostId,
 	getPostById,
-	updateHighlightsByPostId,
+	updateAllHighlightsByPostId,
 	updatePost,
 } from "@/apis/fetcher";
 
@@ -72,12 +72,19 @@ export async function syncPostToSupabase(
 
 	if (annError) throw annError;
 
-	// isSynced 업데이트
-	await updateHighlightsByPostId(postId, {
-		isSynced: true,
+	await updateAllHighlightsByPostId({
+		postId,
+		updates: {
+			isSynced: true,
+			updatedAt: Date.now(),
+		},
 	});
 
-	await updatePost(postId, {
-		isSynced: true,
+	await updatePost({
+		postId,
+		updates: {
+			isSynced: true,
+			updatedAt: Date.now(),
+		},
 	});
 }

@@ -1,4 +1,4 @@
-import { addPost, getPostByUrl, saveHighlight } from "@/apis/fetcher";
+import { createHighlight, createPost, getPostByUrl } from "@/apis/fetcher";
 import type { ClientRect } from "@/hooks/useTextSelection";
 import { appendHighlightTag, generateId } from "@/lib/highlight/highlight";
 import { serializeRange } from "@/lib/highlight/serialization";
@@ -40,7 +40,7 @@ export const CreationModeUI = ({
 						const post = await ensurePostbyUrl(window.location.href);
 
 						const highlightId = generateId();
-						await saveHighlight({
+						await createHighlight({
 							data: serializeRange({
 								range,
 								id: highlightId,
@@ -84,7 +84,10 @@ const ensurePostbyUrl = async (url: string) => {
 
 	if (post === undefined) {
 		const postData = extractPostData();
-		const fetchedPost = await addPost({ ...postData, updatedAt: Date.now() });
+		const fetchedPost = await createPost({
+			...postData,
+			updatedAt: Date.now(),
+		});
 		return fetchedPost;
 	}
 

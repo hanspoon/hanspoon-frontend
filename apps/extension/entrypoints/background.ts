@@ -26,7 +26,8 @@ const broadcastToAll = (message: HighlightSyncMessage) => {
 	browser.runtime.sendMessage(message).catch(() => {});
 };
 
-const addHightLightBackground = async ({
+// 하이라이트
+const createHightLightBackground = async ({
 	data,
 	postId,
 }: {
@@ -41,11 +42,18 @@ const addHightLightBackground = async ({
 		shareId: crypto.randomUUID(),
 		isSynced: false,
 	};
+
 	await db.annotations.add(annotation);
 };
 
-const deleteHighlightBackground = async (id: string) => {
-	await db.annotations.delete(id);
+const updateAllHighlightsByPostIdBackground = ({
+	postId,
+	updates,
+}: {
+	postId: string;
+	updates: Partial<LocalAnnotation>;
+}) => {
+	return db.annotations.upsert(postId, updates);
 };
 
 const getAllHighlightsBackground = () => {
@@ -56,11 +64,27 @@ const getAllHighlightsByPostIdBackground = (postId: string) => {
 	return db.annotations.where("postId").equals(postId).toArray();
 };
 
-const updateAllHighlightsByPostIdBackground = (
-	postId: string,
-	updates: Partial<LocalAnnotation>,
-) => {
-	return db.annotations.upsert(postId, updates);
+const deleteHighlightBackground = async (id: string) => {
+	await db.annotations.delete(id);
+};
+
+const deleteAllHighlightsByPostIdBackground = async (postId: string) => {
+	await db.annotations.where("postId").equals(postId).delete();
+};
+
+// 포스트
+const createPostBackground = async (data: LocalPost) => {
+	await db.posts.add(data);
+};
+
+const updatePostBackground = async ({
+	postId,
+	updates,
+}: {
+	postId: string;
+	updates: Partial<LocalPost>;
+}) => {
+	await db.posts.update(postId, updates);
 };
 
 const getPostByIdBackground = async (id: string) => {
@@ -75,31 +99,16 @@ const getAllPostsBackground = async () => {
 	return await db.posts.toArray();
 };
 
-const addPostBackground = async (data: LocalPost) => {
-	await db.posts.add(data);
-};
-
-const updatePostBackground = async (
-	postId: string,
-	updates: Partial<LocalPost>,
-) => {
-	await db.posts.update(postId, updates);
-};
-
 const deletePostBackground = async (postId: string) => {
 	await db.posts.delete(postId);
-};
-
-const deleteAnnotationsByPostIdBackground = async (postId: string) => {
-	await db.annotations.where("postId").equals(postId).delete();
 };
 
 export default defineBackground({
 	type: "module",
 	main() {
-		onMessage("DB_SAVE_HIGHLIGHT", async (message) => {
+		onMessage("DB_CREATE_HIGHLIGHT", async (message) => {
 			const { data, postId } = message.data;
-			await addHightLightBackground({ data, postId });
+			await createHightLightBackground({ data, postId });
 
 			broadcastToAll({
 				type: "HIGHLIGHT_ADDED",
@@ -149,7 +158,7 @@ export default defineBackground({
 
 		onMessage("DB_UPDATE_ALL_HIGHLIGHTS_BY_POST_ID", async (message) => {
 			const { postId, updates } = message.data;
-			await updateAllHighlightsByPostIdBackground(postId, updates);
+			await updateAllHighlightsByPostIdBackground({ postId, updates });
 			return { success: true };
 		});
 
@@ -158,9 +167,9 @@ export default defineBackground({
 			return posts;
 		});
 
-		onMessage("DB_ADD_POST", async (message) => {
+		onMessage("DB_CREATE_POST", async (message) => {
 			const { postData } = message.data;
-			await addPostBackground(postData);
+			await createPostBackground(postData);
 
 			broadcastToAll({
 				type: "POST_ADDED",
@@ -173,7 +182,7 @@ export default defineBackground({
 
 		onMessage("DB_UPDATE_POST", async (message) => {
 			const { postId, updates } = message.data;
-			await updatePostBackground(postId, updates);
+			await updatePostBackground({ postId, updates });
 			return { success: true };
 		});
 
@@ -192,7 +201,7 @@ export default defineBackground({
 
 		onMessage("DB_DELETE_ALL_HIGHLIGHTS_BY_POST_ID", async (message) => {
 			const { postId } = message.data;
-			await deleteAnnotationsByPostIdBackground(postId);
+			await deleteAllHighlightsByPostIdBackground(postId);
 
 			broadcastToAll({
 				type: "ANNOTATIONS_DELETED",

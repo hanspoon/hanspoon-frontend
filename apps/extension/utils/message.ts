@@ -7,7 +7,10 @@ import type {
 
 export interface DBProtocolMap {
 	// 하이라이트
-	DB_SAVE_HIGHLIGHT: (data: { data: SerializedHighlight; postId: string }) => {
+	DB_CREATE_HIGHLIGHT: (data: {
+		data: SerializedHighlight;
+		postId: string;
+	}) => {
 		success: boolean;
 	};
 	DB_UPDATE_ALL_HIGHLIGHTS_BY_POST_ID: (data: {
@@ -24,7 +27,7 @@ export interface DBProtocolMap {
 	DB_DELETE_HIGHLIGHT: (data: { id: string }) => { success: boolean };
 
 	// 포스트
-	DB_ADD_POST: (data: { postData: LocalPost }) => { success: boolean };
+	DB_CREATE_POST: (data: { postData: LocalPost }) => { success: boolean };
 	DB_UPDATE_POST: (data: { postId: string; updates: Partial<LocalPost> }) => {
 		success: boolean;
 	};
