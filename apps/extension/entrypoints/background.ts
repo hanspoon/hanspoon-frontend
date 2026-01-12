@@ -103,6 +103,16 @@ const deletePostBackground = async (postId: string) => {
 	await db.posts.delete(postId);
 };
 
+// 로그인
+const saveLoginSessionBackground = async (session: unknown) => {
+	return new Promise<{ success: boolean }>((resolve) => {
+		browser.storage.local.set({ session }, () => {
+			console.log("로그인 정보 저장 완료!");
+			resolve({ success: true });
+		});
+	});
+};
+
 export default defineBackground({
 	type: "module",
 	main() {
@@ -212,15 +222,18 @@ export default defineBackground({
 			return { success: true };
 		});
 
+		onMessage("LOGIN_SUCCESS", async (message) => {
+			const { session } = message.data;
+			const result = await saveLoginSessionBackground(session);
+			return result;
+		});
+
 		browser.runtime.onMessageExternal.addListener(
-			(message, sender, sendResponse) => {
+			async (message, sender, sendResponse) => {
 				if (message.type === "LOGIN_SUCCESS") {
 					const session = message.payload;
-
-					browser.storage.local.set({ session }, () => {
-						console.log("로그인 정보 저장 완료!");
-						sendResponse({ success: true });
-					});
+					const result = await saveLoginSessionBackground(session);
+					sendResponse(result);
 
 					if (sender.tab?.id) {
 						browser.tabs.remove(sender.tab.id);

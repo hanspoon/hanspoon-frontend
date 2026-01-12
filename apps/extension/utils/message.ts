@@ -35,6 +35,9 @@ export interface DBProtocolMap {
 	DB_GET_POST_BY_ID: (data: { postId: string }) => LocalPost | undefined;
 	DB_GET_POST_BY_URL: (data: { url: string }) => LocalPost | undefined;
 	DB_DELETE_POST: (data: { postId: string }) => { success: boolean };
+
+	// 로그인
+	LOGIN_SUCCESS: (data: { session: unknown }) => { success: boolean };
 }
 
 export const { sendMessage, onMessage } =
