@@ -1,6 +1,7 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { useEffect, useState } from "react";
-import { getAllHighlights } from "@/apis/fetcher";
+import { getAllHighlightsByPostId, getPostByUrl } from "@/apis/fetcher";
+import { useCurrentUrl } from "@/hooks/useCurrentUrl";
 import type { HighlightSyncMessage } from "@/lib/broadcast/channel";
 import { getBroadcastChannel } from "@/lib/broadcast/channel";
 import { deserializeRange } from "@/lib/highlight/deserialization";
@@ -13,18 +14,35 @@ export function HighlightRestorer() {
 	const [pendingSync, setPendingSync] = useState<HighlightSyncMessage | null>(
 		null,
 	);
-	const allHighlights = useLiveQuery(getAllHighlights, [syncTrigger]);
+	const [postId, setPostId] = useState<string | null>(null);
+	const currentUrl = useCurrentUrl();
+
+	useEffect(() => {
+		const fetchPostId = async () => {
+			const post = await getPostByUrl(currentUrl);
+			setPostId(post?.id || null);
+		};
+		fetchPostId();
+	}, [currentUrl]);
+
+	const allHighlights = useLiveQuery(
+		() => (postId ? getAllHighlightsByPostId(postId) : Promise.resolve([])),
+		[syncTrigger, postId],
+	);
 
 	useEffect(() => {
 		const channel = getBroadcastChannel();
 
-		channel.onMessage((message) => {
+		const handleMessage = (message: HighlightSyncMessage) => {
 			console.log("📡 BroadcastChannel message received:", message);
 			setPendingSync(message);
 			setSyncTrigger((prev) => prev + 1);
-		});
+		};
 
-		return () => {};
+		channel.onMessage(handleMessage);
+
+		return () => {
+		};
 	}, []);
 
 	useEffect(() => {
@@ -56,9 +74,9 @@ export function HighlightRestorer() {
 				const action =
 					pendingSync.type === "HIGHLIGHT_ADDED" ? "added" : "deleted";
 
-				syncMetrics.record(pendingSync.id, latency, action);
+				syncMetrics.record(pendingSync.type, latency, action);
 				console.log(
-					`✅ 동기화 완료: ${pendingSync.id} (${latency.toFixed(2)}ms)`,
+					`✅ 동기화 완료: ${pendingSync.type} (${latency.toFixed(2)}ms)`,
 				);
 
 				setPendingSync(null);
