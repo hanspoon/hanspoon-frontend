@@ -60,7 +60,11 @@ export const PostCard = ({ post }: { post: LocalPost }) => {
 						{post.sourceDomain}
 					</div>
 				</div>
-				{isLoggedIn ? <CardMoreAuthDropdown /> : <CardMoreGuestDropdown />}
+				{isLoggedIn ? (
+					<CardMoreAuthDropdown post={post} />
+				) : (
+					<CardMoreGuestDropdown post={post} />
+				)}
 			</div>
 			<div
 				style={{
