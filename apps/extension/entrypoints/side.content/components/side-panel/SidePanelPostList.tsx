@@ -8,7 +8,7 @@ export const SidePanelPostList = () => {
 	const [refreshKey, setRefreshKey] = useState(0);
 	const allPosts = useLiveQuery(getAllPosts, [refreshKey]);
 
-	useSyncMessage(["POST_ADDED", "POST_DELETED"], () => {
+	useSyncMessage(["POST_CREATED", "POST_DELETED"], () => {
 		setRefreshKey((prev) => prev + 1);
 	});
 

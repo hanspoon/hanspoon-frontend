@@ -1,4 +1,3 @@
-import type { HighlightSyncMessage } from "../lib/broadcast/channel";
 import type {
 	LocalAnnotation,
 	LocalPost,
@@ -6,6 +5,18 @@ import type {
 } from "../lib/highlight/types";
 import { db } from "../models/db";
 import { onMessage } from "../utils/message";
+
+export type HighlightSyncMessage =
+	| {
+			type: "HIGHLIGHT_CREATED";
+			id: string;
+			postId: string;
+			timestamp: number;
+	  }
+	| { type: "HIGHLIGHT_DELETED"; id: string; timestamp: number }
+	| { type: "POST_CREATED"; postId: string; timestamp: number }
+	| { type: "POST_DELETED"; postId: string; timestamp: number }
+	| { type: "All_HIGHLIGHTS_DELETED"; postId: string; timestamp: number };
 
 const broadcastToAll = (message: HighlightSyncMessage) => {
 	browser.tabs.query({}, (tabs) => {
@@ -23,7 +34,9 @@ const broadcastToAll = (message: HighlightSyncMessage) => {
 		}
 	});
 
-	browser.runtime.sendMessage(message).catch(() => {});
+	browser.runtime.sendMessage(message).catch(() => {
+		console.warn(`Failed to broadcastToAll`);
+	});
 };
 
 // 하이라이트
@@ -107,7 +120,6 @@ const deletePostBackground = async (postId: string) => {
 const saveLoginSessionBackground = async (session: unknown) => {
 	return new Promise<{ success: boolean }>((resolve) => {
 		browser.storage.local.set({ session }, () => {
-			console.log("로그인 정보 저장 완료!");
 			resolve({ success: true });
 		});
 	});
@@ -116,18 +128,36 @@ const saveLoginSessionBackground = async (session: unknown) => {
 export default defineBackground({
 	type: "module",
 	main() {
+		// 하이라이트
 		onMessage("DB_CREATE_HIGHLIGHT", async (message) => {
 			const { data, postId } = message.data;
 			await createHightLightBackground({ data, postId });
 
 			broadcastToAll({
-				type: "HIGHLIGHT_ADDED",
+				type: "HIGHLIGHT_CREATED",
 				id: data.id,
 				postId,
 				timestamp: performance.timeOrigin + performance.now(),
 			});
 
 			return { success: true };
+		});
+
+		onMessage("DB_UPDATE_ALL_HIGHLIGHTS_BY_POST_ID", async (message) => {
+			const { postId, updates } = message.data;
+			await updateAllHighlightsByPostIdBackground({ postId, updates });
+			return { success: true };
+		});
+
+		onMessage("DB_GET_ALL_HIGHLIGHTS", async () => {
+			const highlights = await getAllHighlightsBackground();
+			return highlights;
+		});
+
+		onMessage("DB_GET_ALL_HIGHLIGHTS_BY_ID", async (message) => {
+			const { postId } = message.data;
+			const highlights = await getAllHighlightsByPostIdBackground(postId);
+			return highlights;
 		});
 
 		onMessage("DB_DELETE_HIGHLIGHT", async (message) => {
@@ -143,15 +173,37 @@ export default defineBackground({
 			return { success: true };
 		});
 
-		onMessage("DB_GET_ALL_HIGHLIGHTS", async () => {
-			const highlights = await getAllHighlightsBackground();
-			return highlights;
+		onMessage("DB_DELETE_ALL_HIGHLIGHTS_BY_POST_ID", async (message) => {
+			const { postId } = message.data;
+			await deleteAllHighlightsByPostIdBackground(postId);
+
+			broadcastToAll({
+				type: "All_HIGHLIGHTS_DELETED",
+				postId,
+				timestamp: performance.timeOrigin + performance.now(),
+			});
+
+			return { success: true };
 		});
 
-		onMessage("DB_GET_ALL_HIGHLIGHTS_BY_ID", async (message) => {
-			const { postId } = message.data;
-			const highlights = await getAllHighlightsByPostIdBackground(postId);
-			return highlights;
+		// 포스트
+		onMessage("DB_CREATE_POST", async (message) => {
+			const { postData } = message.data;
+			await createPostBackground(postData);
+
+			broadcastToAll({
+				type: "POST_CREATED",
+				postId: postData.id,
+				timestamp: performance.timeOrigin + performance.now(),
+			});
+
+			return { success: true };
+		});
+
+		onMessage("DB_UPDATE_POST", async (message) => {
+			const { postId, updates } = message.data;
+			await updatePostBackground({ postId, updates });
+			return { success: true };
 		});
 
 		onMessage("DB_GET_POST_BY_ID", async (message) => {
@@ -166,34 +218,9 @@ export default defineBackground({
 			return post;
 		});
 
-		onMessage("DB_UPDATE_ALL_HIGHLIGHTS_BY_POST_ID", async (message) => {
-			const { postId, updates } = message.data;
-			await updateAllHighlightsByPostIdBackground({ postId, updates });
-			return { success: true };
-		});
-
 		onMessage("DB_GET_ALL_POSTS", async () => {
 			const posts = await getAllPostsBackground();
 			return posts;
-		});
-
-		onMessage("DB_CREATE_POST", async (message) => {
-			const { postData } = message.data;
-			await createPostBackground(postData);
-
-			broadcastToAll({
-				type: "POST_ADDED",
-				postId: postData.id,
-				timestamp: performance.timeOrigin + performance.now(),
-			});
-
-			return { success: true };
-		});
-
-		onMessage("DB_UPDATE_POST", async (message) => {
-			const { postId, updates } = message.data;
-			await updatePostBackground({ postId, updates });
-			return { success: true };
 		});
 
 		onMessage("DB_DELETE_POST", async (message) => {
@@ -209,19 +236,7 @@ export default defineBackground({
 			return { success: true };
 		});
 
-		onMessage("DB_DELETE_ALL_HIGHLIGHTS_BY_POST_ID", async (message) => {
-			const { postId } = message.data;
-			await deleteAllHighlightsByPostIdBackground(postId);
-
-			broadcastToAll({
-				type: "ANNOTATIONS_DELETED",
-				postId,
-				timestamp: performance.timeOrigin + performance.now(),
-			});
-
-			return { success: true };
-		});
-
+		// 로그인
 		onMessage("LOGIN_SUCCESS", async (message) => {
 			const { session } = message.data;
 			const result = await saveLoginSessionBackground(session);

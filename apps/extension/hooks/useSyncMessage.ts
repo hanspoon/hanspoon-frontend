@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import type { HighlightSyncMessage } from "@/lib/broadcast/channel";
+import type { HighlightSyncMessage } from "@/entrypoints/background";
 
 export function useSyncMessage(
 	types: HighlightSyncMessage["type"][],

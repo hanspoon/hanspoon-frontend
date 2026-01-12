@@ -1,25 +1,25 @@
 import { useEffect, useState } from "react";
 import { getAllHighlightsByPostId, getPostByUrl } from "@/apis/fetcher";
+import type { HighlightSyncMessage } from "@/entrypoints/background";
 import { useCurrentUrl } from "@/hooks/useCurrentUrl";
 import { useSyncMessage } from "@/hooks/useSyncMessage";
-import type { HighlightSyncMessage } from "@/lib/broadcast/channel";
 import { deserializeRange } from "@/lib/highlight/deserialization";
 import { appendHighlightTag } from "@/lib/highlight/highlight";
 import type {
 	LocalAnnotation,
 	SerializedHighlight,
 } from "@/lib/highlight/types";
-import { syncMetrics } from "@/lib/metrics/syncMetrics";
 
 export function HighlightRestorer() {
-	const [syncTrigger, setSyncTrigger] = useState(0);
 	const [pendingSync, setPendingSync] = useState<HighlightSyncMessage | null>(
 		null,
 	);
+
 	const [postId, setPostId] = useState<string | null>(null);
 	const [allHighlights, setAllHighlights] = useState<LocalAnnotation[]>([]);
 	const currentUrl = useCurrentUrl();
 
+	// postId
 	useEffect(() => {
 		const fetchPostId = async () => {
 			const post = await getPostByUrl(currentUrl);
@@ -28,6 +28,7 @@ export function HighlightRestorer() {
 		fetchPostId();
 	}, [currentUrl]);
 
+	// allHighlights at initial render
 	useEffect(() => {
 		const fetchHighlights = async () => {
 			if (!postId) {
@@ -41,15 +42,16 @@ export function HighlightRestorer() {
 	}, [postId]);
 
 	useSyncMessage(
-		["HIGHLIGHT_ADDED", "HIGHLIGHT_DELETED", "POST_ADDED", "POST_DELETED"],
+		["HIGHLIGHT_CREATED", "HIGHLIGHT_DELETED", "POST_CREATED", "POST_DELETED"],
 		async (message: HighlightSyncMessage) => {
-			if (message.type === "POST_ADDED") {
+			console.log({ message });
+			if (message.type === "POST_CREATED") {
 				const post = await getPostByUrl(currentUrl);
 				if (post) {
 					setPostId(post.id);
 				}
 				setPendingSync(message);
-				setSyncTrigger((prev) => prev + 1);
+
 				return;
 			}
 
@@ -75,10 +77,15 @@ export function HighlightRestorer() {
 				}
 			}
 
+			if (
+				postId != null &&
+				(message.type === "HIGHLIGHT_CREATED" ||
+					message.type === "HIGHLIGHT_DELETED")
+			) {
+				setAllHighlights(await getAllHighlightsByPostId(postId));
+			}
+
 			setPendingSync(message);
-			setSyncTrigger((prev) => {
-				return prev + 1;
-			});
 		},
 	);
 
@@ -109,11 +116,10 @@ export function HighlightRestorer() {
 				const endTime = performance.timeOrigin + performance.now();
 				const latency = endTime - pendingSync.timestamp;
 				const action =
-					pendingSync.type === "HIGHLIGHT_ADDED" ? "added" : "deleted";
+					pendingSync.type === "HIGHLIGHT_CREATED" ? "added" : "deleted";
 
-				syncMetrics.record(pendingSync.type, latency, action);
 				console.log(
-					`✅ 동기화 완료: ${pendingSync.type} (${latency.toFixed(2)}ms)`,
+					`✅ 동기화 완료: ${pendingSync.type} ${action} (${latency.toFixed(2)}ms)`,
 				);
 
 				setPendingSync(null);
