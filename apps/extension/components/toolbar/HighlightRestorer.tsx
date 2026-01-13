@@ -32,11 +32,6 @@ export function HighlightRestorer() {
 				return;
 			}
 
-			if (message.type === "POST_CREATED") {
-				setPostId(message.postId);
-				return;
-			}
-
 			if (message.type === "POST_DELETED") {
 				if (message.postId === postId) {
 					setPostId(null);
