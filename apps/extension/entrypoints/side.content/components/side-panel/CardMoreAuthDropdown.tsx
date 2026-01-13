@@ -38,7 +38,10 @@ export const CardMoreAuthDropdown = ({ post }: CardMoreAuthDropdownProps) => {
 		setIsPublished(newPublishState);
 
 		try {
-			await updatePost(post.id, { isPublished: newPublishState });
+			await updatePost({
+				postId: post.id,
+				updates: { isPublished: newPublishState },
+			});
 		} catch (error) {
 			console.error("포스트 업데이트 실패:", error);
 			setIsPublished(!newPublishState);
