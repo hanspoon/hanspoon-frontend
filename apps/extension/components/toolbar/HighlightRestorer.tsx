@@ -1,133 +1,122 @@
 import { useEffect, useState } from "react";
 import { getAllHighlightsByPostId, getPostByUrl } from "@/apis/fetcher";
 import type { HighlightSyncMessage } from "@/entrypoints/background";
-import { useCurrentUrl } from "@/hooks/useCurrentUrl";
-import { useSyncMessage } from "@/hooks/useSyncMessage";
 import { deserializeRange } from "@/lib/highlight/deserialization";
 import { appendHighlightTag } from "@/lib/highlight/highlight";
-import type {
-	LocalAnnotation,
-	SerializedHighlight,
-} from "@/lib/highlight/types";
+import type { LocalAnnotation } from "@/lib/highlight/types";
 
 export function HighlightRestorer() {
-	const [pendingSync, setPendingSync] = useState<HighlightSyncMessage | null>(
-		null,
-	);
-
 	const [postId, setPostId] = useState<string | null>(null);
-	const [allHighlights, setAllHighlights] = useState<LocalAnnotation[]>([]);
-	const currentUrl = useCurrentUrl();
 
-	// postId
 	useEffect(() => {
+		if (typeof window === "undefined") {
+			return;
+		}
+
 		const fetchPostId = async () => {
-			const post = await getPostByUrl(currentUrl);
-			setPostId(post?.id || null);
-		};
-		fetchPostId();
-	}, [currentUrl]);
-
-	// allHighlights at initial render
-	useEffect(() => {
-		const fetchHighlights = async () => {
-			if (!postId) {
-				setAllHighlights([]);
+			const post = await getPostByUrl(window.location.href);
+			if (!post) {
 				return;
 			}
-			const highlights = await getAllHighlightsByPostId(postId);
-			setAllHighlights(highlights || []);
+
+			setPostId(post.id);
+			const highlights = await getAllHighlightsByPostId(post.id);
+			paintHighlights(highlights);
 		};
-		fetchHighlights();
-	}, [postId]);
+		fetchPostId();
+	}, []);
 
-	useSyncMessage(
-		["HIGHLIGHT_CREATED", "HIGHLIGHT_DELETED", "POST_CREATED", "POST_DELETED"],
-		async (message: HighlightSyncMessage) => {
-			console.log({ message });
+	useEffect(() => {
+		const listener = async (message: unknown) => {
+			if (!isHighlightSyncMessage(message)) {
+				return;
+			}
+
 			if (message.type === "POST_CREATED") {
-				const post = await getPostByUrl(currentUrl);
-				if (post) {
-					setPostId(post.id);
-				}
-				setPendingSync(message);
-
+				setPostId(message.postId);
 				return;
 			}
 
 			if (message.type === "POST_DELETED") {
 				if (message.postId === postId) {
-					setAllHighlights([]);
 					setPostId(null);
-
-					const existingHighlights = document.querySelectorAll(
-						"[data-highlight-id]",
-					);
-
-					existingHighlights.forEach((el) => {
-						const parent = el.parentNode;
-						if (parent) {
-							const textNode = document.createTextNode(el.textContent || "");
-							parent.replaceChild(textNode, el);
-							parent.normalize();
-						}
-					});
-
+					unpaintHighlights();
 					return;
 				}
 			}
 
-			if (
-				postId != null &&
-				(message.type === "HIGHLIGHT_CREATED" ||
-					message.type === "HIGHLIGHT_DELETED")
-			) {
-				setAllHighlights(await getAllHighlightsByPostId(postId));
+			if (message.type === "HIGHLIGHT_CREATED") {
+				const highlights = await getAllHighlightsByPostId(message.postId);
+				paintHighlights(highlights);
+				return;
 			}
 
-			setPendingSync(message);
-		},
-	);
-
-	useEffect(() => {
-		if (!allHighlights || allHighlights.length === 0) return;
-
-		const existingHighlights = document.querySelectorAll("[data-highlight-id]");
-		existingHighlights.forEach((el) => {
-			const parent = el.parentNode;
-			if (parent) {
-				const textNode = document.createTextNode(el.textContent || "");
-				parent.replaceChild(textNode, el);
-				parent.normalize();
+			if (postId != null && message.type === "HIGHLIGHT_DELETED") {
+				const highlights = await getAllHighlightsByPostId(postId);
+				unpaintHighlights();
+				paintHighlights(highlights);
+				return;
 			}
-		});
+		};
 
-		try {
-			allHighlights.forEach((data: SerializedHighlight) => {
-				const range = deserializeRange(data);
-				if (range) {
-					appendHighlightTag(range, data.id);
-				} else {
-					console.warn(`복구 실패: ${data.id} (DOM이 변경되었을 수 있음)`);
-				}
-			});
+		browser.runtime.onMessage.addListener(listener);
 
-			if (pendingSync) {
-				const endTime = performance.timeOrigin + performance.now();
-				const latency = endTime - pendingSync.timestamp;
-				const action =
-					pendingSync.type === "HIGHLIGHT_CREATED" ? "added" : "deleted";
-
-				console.log(
-					`✅ 동기화 완료: ${pendingSync.type} ${action} (${latency.toFixed(2)}ms)`,
-				);
-
-				setPendingSync(null);
-			}
-		} catch (e) {
-			console.error("하이라이트 데이터 처리 중 에러 발생", e);
-		}
-	}, [allHighlights, pendingSync]);
+		return () => {
+			browser.runtime.onMessage.removeListener(listener);
+		};
+	}, [postId]);
 
 	return null;
 }
+
+const isHighlightSyncMessage = (
+	message: unknown,
+): message is HighlightSyncMessage => {
+	if (
+		message &&
+		typeof message === "object" &&
+		"type" in message &&
+		typeof message.type === "string" &&
+		[
+			"HIGHLIGHT_CREATED",
+			"HIGHLIGHT_DELETED",
+			"POST_CREATED",
+			"POST_DELETED",
+		].includes(message.type as HighlightSyncMessage["type"])
+	) {
+		return true;
+	}
+
+	return false;
+};
+
+const paintHighlights = (highlights: LocalAnnotation[]) => {
+	highlights.forEach((data) => {
+		let range: Range | null = null;
+
+		try {
+			range = deserializeRange(data);
+		} catch (error) {
+			console.warn(error);
+		}
+
+		if (range != null) {
+			appendHighlightTag(range, data.id);
+		} else {
+			console.warn(`복구 실패: ${data.id} (DOM이 변경되었을 수 있음)`);
+		}
+	});
+};
+
+const unpaintHighlights = () => {
+	const existingHighlights = document.querySelectorAll("[data-highlight-id]");
+
+	existingHighlights.forEach((el) => {
+		const parent = el.parentNode;
+		if (parent) {
+			const textNode = document.createTextNode(el.textContent || "");
+			parent.replaceChild(textNode, el);
+			parent.normalize();
+		}
+	});
+};
