@@ -1,20 +1,38 @@
-import { useLiveQuery } from "dexie-react-hooks";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getAllPosts } from "@/apis/fetcher";
-import { useSyncMessage } from "@/hooks/useSyncMessage";
+import type { HighlightSyncMessage } from "@/entrypoints/background";
+import type { LocalPost } from "@/lib/highlight/types";
 import { PostCard } from "./PostCard";
 
 export const SidePanelPostList = () => {
-	const [refreshKey, setRefreshKey] = useState(0);
-	const allPosts = useLiveQuery(getAllPosts, [refreshKey]);
+	const [allPosts, setAllPosts] = useState<LocalPost[]>([]);
 
-	useSyncMessage(["POST_CREATED", "POST_DELETED"], () => {
-		setRefreshKey((prev) => prev + 1);
-	});
+	useEffect(() => {
+		const fetchPosts = async () => {
+			const posts = await getAllPosts();
+			setAllPosts(posts);
+		};
+		fetchPosts();
+	}, []);
 
-	if (allPosts === undefined) {
-		return null;
-	}
+	useEffect(() => {
+		const listener = async (message: unknown) => {
+			if (!isHighlightSyncMessage(message)) {
+				return;
+			}
+
+			if (message.type === "POST_CREATED" || message.type === "POST_DELETED") {
+				const posts = await getAllPosts();
+				setAllPosts(posts);
+			}
+		};
+
+		browser.runtime.onMessage.addListener(listener);
+
+		return () => {
+			browser.runtime.onMessage.removeListener(listener);
+		};
+	}, []);
 
 	if (allPosts.length === 0) {
 		return (
@@ -66,4 +84,25 @@ export const SidePanelPostList = () => {
 			</div>
 		</div>
 	);
+};
+
+const isHighlightSyncMessage = (
+	message: unknown,
+): message is HighlightSyncMessage => {
+	if (
+		message &&
+		typeof message === "object" &&
+		"type" in message &&
+		typeof message.type === "string" &&
+		[
+			"HIGHLIGHT_CREATED",
+			"HIGHLIGHT_DELETED",
+			"POST_CREATED",
+			"POST_DELETED",
+		].includes(message.type as HighlightSyncMessage["type"])
+	) {
+		return true;
+	}
+
+	return false;
 };
