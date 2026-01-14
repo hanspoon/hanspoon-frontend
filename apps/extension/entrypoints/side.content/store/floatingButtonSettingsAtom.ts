@@ -51,7 +51,7 @@ export const setStorageConfig = async (
 export const floatingButtonConfigAtom =
 	atom<FloatingButtonConfig>(defaultConfig);
 
-export const floatingButtonActionsAtom = atom(
+export const floatingButtonSettingsAtom = atom(
 	(get) => get(floatingButtonConfigAtom),
 	(get, set, action: FloatingButtonAction) => {
 		const currentConfig = get(floatingButtonConfigAtom);

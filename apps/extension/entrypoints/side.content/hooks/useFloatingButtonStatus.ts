@@ -3,15 +3,15 @@ import { useEffect, useState } from "react";
 import {
 	isEnabledForCurrentSite as checkEnabled,
 	type FloatingButtonConfig,
-	floatingButtonActionsAtom,
 	floatingButtonConfigAtom,
+	floatingButtonSettingsAtom,
 	getStorageConfig,
 	STORAGE_KEY,
-} from "../store/floatingButtonConfig";
+} from "../store/floatingButtonSettingsAtom";
 
-export const useFloatingButtonConfig = () => {
+export const useFloatingButtonStatus = () => {
 	const [config, setConfig] = useAtom(floatingButtonConfigAtom);
-	const [, dispatch] = useAtom(floatingButtonActionsAtom);
+	const [, dispatch] = useAtom(floatingButtonSettingsAtom);
 	const [isLoaded, setIsLoaded] = useState(false);
 
 	useEffect(() => {

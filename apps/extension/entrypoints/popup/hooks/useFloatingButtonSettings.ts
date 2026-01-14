@@ -2,15 +2,15 @@ import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 import {
 	type FloatingButtonConfig,
-	floatingButtonActionsAtom,
 	floatingButtonConfigAtom,
+	floatingButtonSettingsAtom,
 	getStorageConfig,
 	STORAGE_KEY,
-} from "../../side.content/store/floatingButtonConfig";
+} from "../../side.content/store/floatingButtonSettingsAtom";
 
-export const usePopupFloatingButtonConfig = () => {
+export const useFloatingButtonSettings = () => {
 	const [config, setConfig] = useAtom(floatingButtonConfigAtom);
-	const [, dispatch] = useAtom(floatingButtonActionsAtom);
+	const [, dispatch] = useAtom(floatingButtonSettingsAtom);
 	const [isLoaded, setIsLoaded] = useState(false);
 	const [currentTabDomain, setCurrentTabDomain] = useState<string>("");
 

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useDrag } from "../hooks/useDrag";
-import { useFloatingButtonConfig } from "../hooks/useFloatingButtonConfig";
+import { useFloatingButtonStatus } from "../hooks/useFloatingButtonStatus";
 import { useSidePanel } from "../hooks/useSidePanel";
 import { HanspoonFloatingButton } from "./floating-button/haspoon-floating-button";
 import { SidePanel } from "./side-panel";
@@ -11,7 +11,7 @@ export const FloatingTab = () => {
 	const { yRatio, isDragging, hasMoved, handleMouseDown } = useDrag(0.5);
 	const { isOpen, sideWidth, setIsOpen } = useSidePanel(400);
 	const { isEnabledForCurrentSite, disableForCurrentSite, disableGlobally } =
-		useFloatingButtonConfig();
+		useFloatingButtonStatus();
 
 	const [isHovered, setIsHovered] = useState(false);
 	const [activeTab, setActiveTab] = useState<TabType>("hanspoon");
