@@ -1,7 +1,7 @@
 import { Provider } from "jotai";
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App.tsx";
+import { HanspoonPopup } from "./HanspoonPopup";
 import "./style.css";
 
 const rootElement = document.getElementById("root");
@@ -9,7 +9,7 @@ if (rootElement) {
 	ReactDOM.createRoot(rootElement).render(
 		<React.StrictMode>
 			<Provider>
-				<App />
+				<HanspoonPopup />
 			</Provider>
 		</React.StrictMode>,
 	);
