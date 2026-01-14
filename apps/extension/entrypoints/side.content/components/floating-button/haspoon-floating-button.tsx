@@ -1,3 +1,4 @@
+import logo from "../../../../public/logo.svg";
 import { Dropdown, type DropdownMenuItem } from "../common/Dropdown";
 
 interface HanspoonFloatingButtonProps {
@@ -71,22 +72,22 @@ export const HanspoonFloatingButton = ({
 				onMouseDown={handleMouseDown}
 				onClick={onClick}
 				style={{
-					width: "60px",
-					height: "40px",
+					width: "52px",
+					height: "34px",
 					borderTopLeftRadius: "30px",
 					borderBottomLeftRadius: "30px",
-					backgroundColor: "#4ade80",
+					// backgroundColor: "#4ade80",
+					backgroundColor: "white",
 					border: "none",
 					cursor: isDragging ? "grabbing" : "grab",
 					boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-					fontSize: "28px",
 					display: "flex",
 					alignItems: "center",
 					justifyContent: "center",
 					transition: isDragging ? "none" : "all 0.3s ease",
 				}}
 			>
-				🥄
+				<img src={logo} alt="logo" width={24} height={24} />
 			</button>
 		</div>
 	);
