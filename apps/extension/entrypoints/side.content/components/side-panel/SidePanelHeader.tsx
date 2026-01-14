@@ -6,14 +6,13 @@ export const SidePanelHeader = ({ setIsOpen }: SidePanelHeaderProps) => {
 	return (
 		<div
 			style={{
-				padding: "20px",
 				display: "flex",
-				justifyContent: "space-between",
+				justifyContent: "flex-end",
 				alignItems: "center",
 			}}
 		>
-			<h2 style={{ margin: 0, fontSize: "18px", fontWeight: 600 }}>한스푼</h2>
 			<button
+				className="close-button"
 				type="button"
 				onClick={() => setIsOpen(false)}
 				style={{
@@ -22,10 +21,19 @@ export const SidePanelHeader = ({ setIsOpen }: SidePanelHeaderProps) => {
 					fontSize: "12px",
 					cursor: "pointer",
 					color: "#6b7280",
+					transition: "transform 0.1s ease",
 				}}
 			>
 				✕
 			</button>
+			<style>{`
+				.close-button:active {
+					transform: scale(0.8);
+				}
+				.close-button:hover {
+					color: black;
+				}
+			`}</style>
 		</div>
 	);
 };
