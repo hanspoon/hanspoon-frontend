@@ -33,24 +33,11 @@ export const SidePanel = ({
 				display: "flex",
 				flexDirection: "column",
 				borderLeft: "1px solid #e5e7eb",
+				padding: "20px",
 			}}
 		>
 			<SidePanelHeader setIsOpen={setIsOpen} />
-
-			<div
-				style={{
-					flex: 1,
-					padding: "20px",
-					overflowY: "hidden",
-					display: "flex",
-					flexDirection: "column",
-					gap: "16px",
-				}}
-			>
-				{/* {currentPost && <CurrentPost currentPost={currentPost} />} */}
-
-				{activeTab === "hanspoon" && <SidePanelPostList />}
-			</div>
+			<SidePanelPostList />
 		</div>
 	);
 };

@@ -1,3 +1,4 @@
+import { BlinkingText } from "@/components/common/BlinkingText";
 import logo from "../../public/logo.svg";
 import { usePopupFloatingButtonConfig } from "./hooks/usePopupFloatingButtonConfig";
 
@@ -64,12 +65,14 @@ const App = () => {
 					<button
 						type="button"
 						onClick={enableGlobally}
+						className="blink-parent"
 						style={{
 							cursor: "pointer",
 							fontWeight: "bold",
 						}}
 					>
-						{">"} 전역 활성화
+						<BlinkingText pauseOnParentHover>{">"}</BlinkingText>
+						&nbsp;전역 활성화
 					</button>
 				)}
 
@@ -77,12 +80,14 @@ const App = () => {
 					<button
 						type="button"
 						onClick={enableForCurrentSite}
+						className="blink-parent"
 						style={{
 							cursor: "pointer",
 							fontWeight: "bold",
 						}}
 					>
-						{">"} {currentTabDomain} 활성화
+						<BlinkingText pauseOnParentHover>{">"}</BlinkingText>
+						&nbsp;{currentTabDomain} 활성화
 					</button>
 				)}
 

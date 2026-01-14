@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { getAllPosts } from "@/apis/fetcher";
 import type { HighlightSyncMessage } from "@/entrypoints/background";
 import type { LocalPost } from "@/lib/highlight/types";
+import { BlinkingText } from "../../../../components/common/BlinkingText";
 import { PostCard } from "./PostCard";
 
 export const SidePanelPostList = () => {
@@ -21,7 +22,11 @@ export const SidePanelPostList = () => {
 				return;
 			}
 
-			if (message.type === "POST_CREATED" || message.type === "POST_DELETED") {
+			if (message.type === "POST_CREATED") {
+				setAllPosts(allPosts);
+			}
+
+			if (message.type === "POST_DELETED") {
 				setAllPosts(allPosts);
 			}
 		};
@@ -37,12 +42,23 @@ export const SidePanelPostList = () => {
 		return (
 			<div
 				style={{
+					height: "100%",
 					padding: "20px",
 					textAlign: "center",
+					display: "flex",
+					flexDirection: "column",
+					alignItems: "center",
+					justifyContent: "center",
 					color: "#6b7280",
+					fontFamily: "Umdot",
 				}}
 			>
-				저장된 포스트가 없습니다.
+				<div>
+					ㄴH 공간ㅇl... ㄴㅓ무 비었ㄴl..<BlinkingText>?</BlinkingText>
+				</div>
+				<div>
+					ュ럼... 하나만 '하이라이트' ㅎH줄ㄹH..<BlinkingText>?</BlinkingText>
+				</div>
 			</div>
 		);
 	}
@@ -53,33 +69,30 @@ export const SidePanelPostList = () => {
 				display: "flex",
 				flexDirection: "column",
 				height: "100%",
+				padding: "10px 0px",
 			}}
 		>
+			<div
+				style={{
+					fontSize: "14px",
+					marginBottom: "8px",
+				}}
+			>
+				모든 포스트
+			</div>
 			<div
 				style={{
 					flex: 1,
 					overflowY: "auto",
 					marginBottom: "20px",
+					display: "flex",
+					flexDirection: "column",
+					gap: "8px",
 				}}
 			>
-				<div
-					style={{
-						display: "flex",
-						flexDirection: "column",
-						gap: "8px",
-					}}
-				>
-					<div
-						style={{
-							fontSize: "14px",
-						}}
-					>
-						모든 포스트
-					</div>
-					{allPosts.map((post) => (
-						<PostCard key={post.id} post={post} />
-					))}
-				</div>
+				{allPosts.map((post) => (
+					<PostCard key={post.id} post={post} />
+				))}
 			</div>
 		</div>
 	);
