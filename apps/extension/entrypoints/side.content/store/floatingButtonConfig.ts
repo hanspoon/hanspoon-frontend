@@ -10,6 +10,12 @@ export const defaultConfig: FloatingButtonConfig = {
 	disabledDomains: [],
 };
 
+type FloatingButtonAction =
+	| { type: "DISABLE_FOR_SITE"; payload?: string }
+	| { type: "DISABLE_GLOBALLY" }
+	| { type: "ENABLE_GLOBALLY" }
+	| { type: "ENABLE_FOR_SITE"; payload?: string };
+
 export const STORAGE_KEY = "floatingButtonConfig";
 
 export const getStorageConfig = async (): Promise<FloatingButtonConfig> => {
@@ -47,7 +53,7 @@ export const floatingButtonConfigAtom =
 
 export const floatingButtonActionsAtom = atom(
 	(get) => get(floatingButtonConfigAtom),
-	(get, set, action: { type: string; payload?: string }) => {
+	(get, set, action: FloatingButtonAction) => {
 		const currentConfig = get(floatingButtonConfigAtom);
 
 		let newConfig: FloatingButtonConfig | null = null;
@@ -88,7 +94,7 @@ export const floatingButtonActionsAtom = atom(
 				break;
 			}
 			default:
-				console.warn("⚠️ [FloatingButton] Unknown action:", action.type);
+				console.warn("⚠️ [FloatingButton] Unknown action:", action);
 				break;
 		}
 
@@ -101,10 +107,7 @@ export const floatingButtonActionsAtom = atom(
 	},
 );
 
-export function matchDomainPattern(
-	currentDomain: string,
-	pattern: string,
-): boolean {
+function matchDomainPattern(currentDomain: string, pattern: string): boolean {
 	if (currentDomain === pattern) return true;
 
 	if (pattern.startsWith("*.")) {
