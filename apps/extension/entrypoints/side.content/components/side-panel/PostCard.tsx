@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { LocalPost } from "@/lib/highlight/types";
 import { useSession } from "../../hooks/useSession";
 import { CardMoreAuthDropdown } from "./CardMoreAuthDropdown";
@@ -6,88 +7,121 @@ import { CardMoreGuestDropdown } from "./CardMoreGuestDropdown";
 export const PostCard = ({ post }: { post: LocalPost }) => {
 	const { session } = useSession();
 	const isLoggedIn = !!session;
+	const [isHovered, setIsHovered] = useState(false);
 
 	return (
-		/** biome-ignore lint/a11y/useKeyWithClickEvents: Post card click handler */
-		/** biome-ignore lint/a11y/noStaticElementInteractions: Post card clickable */
 		<div
 			style={{
-				padding: "16px",
-				border: "1px solid #e5e7eb",
-				borderRadius: "8px",
-				cursor: "pointer",
-				transition: "all 0.2s",
-				backgroundColor: "white",
-			}}
-			onMouseEnter={(e) => {
-				e.currentTarget.style.backgroundColor = "#f9fafb";
-				e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.1)";
-			}}
-			onMouseLeave={(e) => {
-				e.currentTarget.style.backgroundColor = "white";
-				e.currentTarget.style.boxShadow = "none";
-			}}
-			onClick={() => {
-				window.open(post.url, "_blank");
+				position: "relative",
+				height: "auto",
+				border: "1px solid #D9D9D9",
+				backgroundColor: "#f5f5f5",
+				backgroundImage:
+					"repeating-linear-gradient(45deg, transparent, transparent 10px, #e0e0e0 10px, #e0e0e0 11px)",
 			}}
 		>
 			<div
 				style={{
-					display: "flex",
-					justifyContent: "space-between",
-					alignItems: "center",
-					marginBottom: "8px",
+					position: "absolute",
+					top: "50%",
+					left: "90%",
+					zIndex: 1,
+					transform: "translate(-50%, -50%)",
 				}}
 			>
-				<div style={{ display: "flex", gap: "4px" }}>
-					{post.favIconUrl && (
-						<img
-							src={post.favIconUrl}
-							alt=""
-							style={{
-								width: "16px",
-								height: "16px",
-								borderRadius: "2px",
-							}}
-						/>
-					)}
-					<div
-						style={{
-							fontSize: "12px",
-							color: "#6b7280",
-						}}
-					>
-						{post.sourceDomain}
-					</div>
-				</div>
 				{isLoggedIn ? (
 					<CardMoreAuthDropdown post={post} />
 				) : (
 					<CardMoreGuestDropdown post={post} />
 				)}
 			</div>
-			<div
+
+			<button
+				type="button"
 				style={{
-					fontSize: "16px",
-					fontWeight: "600",
-					marginBottom: "8px",
-					color: "#111827",
+					position: "relative",
+					height: "100px",
+					zIndex: 2,
+					padding: "12px",
+					cursor: "pointer",
+					transition: "all 0.2s ease-out",
+					backgroundColor: "white",
+					border: "1px solid #D9D9D9",
+					width: isHovered ? "100%" : "80%",
+				}}
+				onMouseEnter={() => setIsHovered(true)}
+				onMouseLeave={() => setIsHovered(false)}
+				onClick={() => {
+					window.open(post.url, "_blank");
 				}}
 			>
-				{post.title}
-			</div>
-			<div
-				style={{
-					fontSize: "12px",
-					color: "#9ca3af",
-				}}
-			>
-				{new Date(post.updatedAt).toLocaleDateString("ko-KR", {
-					year: "numeric",
-					month: "long",
-					day: "numeric",
-				})}
-			</div>
+				<div
+					style={{
+						display: "flex",
+						flexDirection: "column",
+						alignItems: "flex-start",
+						gap: "4px",
+					}}
+				>
+					<div
+						style={{
+							display: "flex",
+							alignItems: "center",
+							gap: "6px",
+							marginBottom: "6px",
+						}}
+					>
+						{post.favIconUrl && (
+							<img
+								src={post.favIconUrl}
+								alt=""
+								style={{
+									width: "14px",
+									height: "14px",
+									borderRadius: "2px",
+								}}
+							/>
+						)}
+						<p
+							style={{
+								fontSize: "11px",
+								color: "#9ca3af",
+							}}
+						>
+							{post.sourceDomain}
+						</p>
+					</div>
+					<div
+						style={{
+							width: "200px",
+						}}
+					>
+						<p
+							style={{
+								textAlign: "left",
+								fontSize: "13px",
+								fontWeight: "500",
+								marginBottom: "4px",
+								color: "#111827",
+							}}
+						>
+							{post.title}
+						</p>
+					</div>
+					<p
+						style={{
+							fontSize: "11px",
+							color: "#d1d5db",
+						}}
+					>
+						{new Date(post.updatedAt).toLocaleDateString("ko-KR", {
+							year: "numeric",
+							month: "long",
+							day: "numeric",
+						})}
+					</p>
+				</div>
+			</button>
 		</div>
 	);
 };
