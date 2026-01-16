@@ -151,10 +151,10 @@ export const Dropdown = ({
 										e.currentTarget.style.backgroundColor = "transparent";
 									}}
 								>
+									{item.label}
 									{item.icon && (
 										<span style={{ marginRight: "8px" }}>{item.icon}</span>
 									)}
-									{item.label}
 								</button>
 							);
 						})}
