@@ -22,12 +22,9 @@ export const SidePanelPostList = () => {
 				return;
 			}
 
-			if (message.type === "POST_CREATED") {
-				setAllPosts(allPosts);
-			}
-
-			if (message.type === "POST_DELETED") {
-				setAllPosts(allPosts);
+			if (message.type === "POST_CREATED" || message.type === "POST_DELETED") {
+				const posts = await getAllPosts();
+				setAllPosts(posts);
 			}
 		};
 
@@ -36,7 +33,7 @@ export const SidePanelPostList = () => {
 		return () => {
 			browser.runtime.onMessage.removeListener(listener);
 		};
-	}, [allPosts]);
+	}, []);
 
 	if (allPosts.length === 0) {
 		return <EmptyPostList />;
