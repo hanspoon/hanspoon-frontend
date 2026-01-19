@@ -6,7 +6,7 @@ import {
 	floatingButtonSettingsAtom,
 	getStorageConfig,
 	STORAGE_KEY,
-} from "../../side.content/store/floatingButtonSettingsAtom";
+} from "../../../store/floatingButtonSettingsAtom";
 
 export const useFloatingButtonSettings = () => {
 	const [config, setConfig] = useAtom(floatingButtonConfigAtom);

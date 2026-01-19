@@ -7,7 +7,7 @@ import {
 	floatingButtonSettingsAtom,
 	getStorageConfig,
 	STORAGE_KEY,
-} from "../store/floatingButtonSettingsAtom";
+} from "../../../store/floatingButtonSettingsAtom";
 
 export const useFloatingButtonStatus = () => {
 	const [config, setConfig] = useAtom(floatingButtonConfigAtom);

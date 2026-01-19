@@ -1,5 +1,5 @@
 import { CAMEL_DATASET_IDENTIFIER } from "./const";
-import { camelToKebab } from "./kebab";
+import { camelToKebab } from "../utils/kebab";
 
 export const removeHighlight = (id: string) => {
 	const attributeName = `data-${camelToKebab(CAMEL_DATASET_IDENTIFIER)}`;

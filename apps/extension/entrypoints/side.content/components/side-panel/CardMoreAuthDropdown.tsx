@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { syncPostToSupabase } from "@/lib/highlight/syncPostToSupabase";
+import { syncPostToSupabase } from "@/lib/sync/syncPostToSupabase";
 import type { LocalPost } from "@/lib/highlight/types";
 import {
 	deleteAllHighlightsByPostId,
