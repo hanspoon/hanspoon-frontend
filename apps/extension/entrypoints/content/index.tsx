@@ -1,4 +1,4 @@
-import { Toolbar } from "@/components/toolbar/Toolbar";
+import { Toolbar } from "@/entrypoints/content/components/toolbar/Toolbar";
 import "@/lib/metrics/syncMetrics";
 import ReactDOM from "react-dom/client";
 import { highlightSyncStore } from "@/lib/sync/highlightSyncStore";
