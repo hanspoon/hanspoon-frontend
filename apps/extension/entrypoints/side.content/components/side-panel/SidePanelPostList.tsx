@@ -1,38 +1,16 @@
-import { useEffect, useState } from "react";
-import { getAllPosts } from "@/apis/fetcher";
-import type { HighlightSyncMessage } from "@/entrypoints/background";
-import type { LocalPost } from "@/lib/highlight/types";
+import { useEffect, useSyncExternalStore } from "react";
+import { postSyncStore } from "@/lib/sync/postSyncStore";
 import { BlinkingText } from "../../../../components/common/BlinkingText";
 import { PostCard } from "./PostCard";
 
 export const SidePanelPostList = () => {
-	const [allPosts, setAllPosts] = useState<LocalPost[]>([]);
+	const { posts: allPosts } = useSyncExternalStore(
+		postSyncStore.subscribe,
+		postSyncStore.getSnapshot,
+	);
 
 	useEffect(() => {
-		const fetchPosts = async () => {
-			const posts = await getAllPosts();
-			setAllPosts(posts);
-		};
-		fetchPosts();
-	}, []);
-
-	useEffect(() => {
-		const listener = async (message: unknown) => {
-			if (!isHighlightSyncMessage(message)) {
-				return;
-			}
-
-			if (message.type === "POST_CREATED" || message.type === "POST_DELETED") {
-				const posts = await getAllPosts();
-				setAllPosts(posts);
-			}
-		};
-
-		browser.runtime.onMessage.addListener(listener);
-
-		return () => {
-			browser.runtime.onMessage.removeListener(listener);
-		};
+		postSyncStore.initialize();
 	}, []);
 
 	if (allPosts.length === 0) {
@@ -64,27 +42,6 @@ export const SidePanelPostList = () => {
 			</div>
 		</div>
 	);
-};
-
-const isHighlightSyncMessage = (
-	message: unknown,
-): message is HighlightSyncMessage => {
-	if (
-		message &&
-		typeof message === "object" &&
-		"type" in message &&
-		typeof message.type === "string" &&
-		[
-			"HIGHLIGHT_CREATED",
-			"HIGHLIGHT_DELETED",
-			"POST_CREATED",
-			"POST_DELETED",
-		].includes(message.type as HighlightSyncMessage["type"])
-	) {
-		return true;
-	}
-
-	return false;
 };
 
 const EmptyPostList = () => {
