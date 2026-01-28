@@ -1,8 +1,8 @@
 {
-	"name": "wxt-react-starter",
-	"description": "manifest.json description",
+	"name": "hanspoon",
+	"description": "한 스푼은 아티클에서 마음에 남는 문장을 하이라이트하고, 그것들을 모아 나만의 인사이트로 저장하고 공유하는 크롬 익스텐션입니다. 읽기만 하면 흘러가던 문장에 ‘한 스푼’의 선택을 더해, 기억에 남는 배움으로 만들어줍니다.",
 	"private": true,
-	"version": "0.0.0",
+	"version": "0.0.1",
 	"type": "module",
 	"scripts": {
 		"dev": "wxt",
