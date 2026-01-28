@@ -2,23 +2,19 @@ import logo from "../../../../public/logo.svg";
 import { Dropdown, type DropdownMenuItem } from "../common/Dropdown";
 
 interface HanspoonFloatingButtonProps {
-	// handleMouseDown: (e: React.MouseEvent) => void;
 	isDragging: boolean;
-	isHover: boolean;
-	// hasMoved: boolean;
 	onClick: () => void;
 	onDisableForSite: () => void;
 	onDisableGlobally: () => void;
 }
 
 export const HanspoonFloatingButton = ({
-	// handleMouseDown,
 	isDragging,
-	isHover,
 	onClick,
 	onDisableForSite,
 	onDisableGlobally,
 }: HanspoonFloatingButtonProps) => {
+	const [isHovered, setIsHovered] = useState(false);
 	const menuItems: DropdownMenuItem[] = [
 		{
 			label: "이 사이트에서 비활성화",
@@ -37,7 +33,12 @@ export const HanspoonFloatingButton = ({
 	];
 
 	return (
-		<div style={{ position: "relative" }}>
+		// biome-ignore lint/a11y/noStaticElementInteractions: <>
+		<div
+			style={{ position: "relative" }}
+			onMouseEnter={() => setIsHovered(true)}
+			onMouseLeave={() => setIsHovered(false)}
+		>
 			<Dropdown
 				trigger={
 					<button
@@ -51,14 +52,14 @@ export const HanspoonFloatingButton = ({
 							cursor: "pointer",
 							boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
 							fontSize: "8px",
-							display: isHover ? "flex" : "none",
+							display: isHovered ? "flex" : "none",
 							alignItems: "center",
 							justifyContent: "center",
 							color: "#6b7280",
-							opacity: isHover ? 1 : 0,
-							transform: isHover ? "translateY(0)" : "translateY(20px)",
+							opacity: isHovered ? 1 : 0,
+							transform: isHovered ? "translateY(0)" : "translateY(20px)",
 							transition: "all 0.3s ease 0.1s",
-							pointerEvents: isHover ? "auto" : "none",
+							pointerEvents: isHovered ? "auto" : "none",
 						}}
 					>
 						✕
@@ -69,7 +70,6 @@ export const HanspoonFloatingButton = ({
 			/>
 			<button
 				type="button"
-				// onMouseDown={handleMouseDown}
 				onClick={onClick}
 				style={{
 					width: "52px",
