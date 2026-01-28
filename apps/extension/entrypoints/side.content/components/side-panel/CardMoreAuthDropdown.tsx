@@ -55,13 +55,13 @@ export const CardMoreAuthDropdown = ({ post }: CardMoreAuthDropdownProps) => {
 
 	const handleViewSite = () => {
 		if (!isPublished || !post.shareId) return;
-		const shareUrl = `http://localhost:5173/shared/${post.shareId}`;
+		const shareUrl = `http://localhost:5173/share/${post.shareId}`;
 		window.open(shareUrl, "_blank");
 	};
 
 	const handleCopyLink = async () => {
 		if (!isPublished || !post.shareId) return;
-		const shareUrl = `http://localhost:5173/shared/${post.shareId}`;
+		const shareUrl = `http://localhost:5173/share/${post.shareId}`;
 
 		try {
 			await navigator.clipboard.writeText(shareUrl);

@@ -1,5 +1,5 @@
-import { useState } from "react";
 import { createClient } from "@supabase/supabase-js";
+import { useState } from "react";
 import type { LocalPost } from "@/lib/highlight/types";
 import {
 	deleteAllHighlightsByPostId,
