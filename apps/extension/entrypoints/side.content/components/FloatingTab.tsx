@@ -23,11 +23,11 @@ export const FloatingTab = () => {
 
 	useEffect(() => {
 		const handleMouseMove = (e: MouseEvent) => {
-			if (startY.current === null) {
+			mousePositionRef.current = e.clientY;
+
+			if (startY.current === null || offset.current === null) {
 				return;
 			}
-
-			mousePositionRef.current = e.clientY;
 
 			if (
 				!hasDragged.current &&
@@ -35,10 +35,6 @@ export const FloatingTab = () => {
 			) {
 				hasDragged.current = true;
 				setIsDragging(true);
-			}
-
-			if (!hasDragged.current || offset.current === null) {
-				return;
 			}
 
 			const newY = mousePositionRef.current - offset.current;
