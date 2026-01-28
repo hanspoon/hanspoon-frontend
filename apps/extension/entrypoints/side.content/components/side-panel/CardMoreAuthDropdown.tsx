@@ -55,13 +55,17 @@ export const CardMoreAuthDropdown = ({ post }: CardMoreAuthDropdownProps) => {
 
 	const handleViewSite = () => {
 		if (!isPublished || !post.shareId) return;
-		const shareUrl = `http://localhost:5173/share/${post.shareId}`;
+		const shareUrl = import.meta.env.DEV
+			? `http://localhost:5173/share/${post.shareId}`
+			: `https://hanspoon.vercel.app/share/${post.shareId}`;
 		window.open(shareUrl, "_blank");
 	};
 
 	const handleCopyLink = async () => {
 		if (!isPublished || !post.shareId) return;
-		const shareUrl = `http://localhost:5173/share/${post.shareId}`;
+		const shareUrl = import.meta.env.DEV
+			? `http://localhost:5173/share/${post.shareId}`
+			: `https://hanspoon.vercel.app/share/${post.shareId}`;
 
 		try {
 			await navigator.clipboard.writeText(shareUrl);

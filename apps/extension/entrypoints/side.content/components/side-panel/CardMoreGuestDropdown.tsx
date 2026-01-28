@@ -33,7 +33,9 @@ export const CardMoreGuestDropdown = ({ post }: CardMoreGuestDropdownProps) => {
 						access_type: "offline",
 						prompt: "consent",
 					},
-					redirectTo: `http://localhost:5173/auth/callback`,
+					redirectTo: import.meta.env.DEV
+					? "http://localhost:5173/auth/callback"
+					: "https://hanspoon.vercel.app/auth/callback",
 					skipBrowserRedirect: true,
 				},
 			});
