@@ -1,4 +1,3 @@
-import type { TabType } from "../FloatingTab";
 import { SidePanelHeader } from "./SidePanelHeader";
 import { SidePanelPostList } from "./SidePanelPostList";
 
@@ -6,12 +5,9 @@ interface SidePanelProps {
 	sideWidth: number;
 	isOpen: boolean;
 	setIsOpen: (value: boolean) => void;
-	activeTab: TabType;
 }
 
 export const SidePanel = ({ sideWidth, isOpen, setIsOpen }: SidePanelProps) => {
-	// const { currentPost } = useCurrentPost();
-
 	return (
 		<div
 			style={{

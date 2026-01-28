@@ -1,20 +1,50 @@
-import { useState } from "react";
-import { useDrag } from "../hooks/useDrag";
+import { useRef, useState } from "react";
 import { useFloatingButtonStatus } from "../hooks/useFloatingButtonStatus";
 import { useSidePanel } from "../hooks/useSidePanel";
 import { HanspoonFloatingButton } from "./floating-button/haspoon-floating-button";
 import { SidePanel } from "./side-panel";
 
-export type TabType = "hanspoon";
-
 export const FloatingTab = () => {
-	const { yRatio, isDragging, hasMoved, handleMouseDown } = useDrag(0.5);
 	const { isOpen, sideWidth, setIsOpen } = useSidePanel(400);
 	const { isEnabledForCurrentSite, disableForCurrentSite, disableGlobally } =
 		useFloatingButtonStatus();
 
 	const [isHovered, setIsHovered] = useState(false);
-	const [activeTab, setActiveTab] = useState<TabType>("hanspoon");
+	const [isDragging, setIsDragging] = useState(false);
+	const [y, setY] = useState(100);
+
+	const elementRef = useRef<HTMLDivElement | null>(null);
+	const mousePositionRef = useRef<number | null>(null);
+	const offset = useRef<number | null>(null);
+
+	useEffect(() => {
+		const handleMouseMove = (e: MouseEvent) => {
+			mousePositionRef.current = e.clientY;
+
+			if (offset.current === null) {
+				return;
+			}
+
+			const newY = mousePositionRef.current - offset.current;
+
+			setY(newY);
+		};
+
+		const handleMouseUp = () => {
+			mousePositionRef.current = null;
+			offset.current = null;
+			setIsHovered(false);
+			setIsDragging(false);
+		};
+
+		document.addEventListener("mousemove", handleMouseMove);
+		document.addEventListener("mouseup", handleMouseUp);
+
+		return () => {
+			document.removeEventListener("mousemove", handleMouseMove);
+			document.removeEventListener("mouseup", handleMouseUp);
+		};
+	}, [y]);
 
 	const enabled = isEnabledForCurrentSite();
 
@@ -26,11 +56,22 @@ export const FloatingTab = () => {
 		<div style={{ fontFamily: "system-ui" }}>
 			{/** biome-ignore lint/a11y/noStaticElementInteractions: static */}
 			<div
-				onMouseEnter={() => setIsHovered(true)}
-				onMouseLeave={() => setIsHovered(false)}
+				ref={elementRef}
+				onMouseDown={(e) => {
+					setIsDragging(true);
+
+					if (elementRef.current === null) {
+						return;
+					}
+
+					mousePositionRef.current = e.clientY;
+					offset.current =
+						mousePositionRef.current -
+						elementRef.current?.getBoundingClientRect().top;
+				}}
 				style={{
 					position: "fixed",
-					top: `${yRatio * 100}vh`,
+					top: `${y}px`,
 					right: isOpen ? `${sideWidth}px` : "0px",
 					display: "flex",
 					flexDirection: "column",
@@ -43,14 +84,9 @@ export const FloatingTab = () => {
 			>
 				<HanspoonFloatingButton
 					isHover={isHovered}
-					handleMouseDown={handleMouseDown}
 					isDragging={isDragging}
-					hasMoved={hasMoved}
 					onClick={() => {
-						if (!hasMoved) {
-							setActiveTab("hanspoon");
-							setIsOpen(!isOpen);
-						}
+						setIsOpen(!isOpen);
 					}}
 					onDisableForSite={() => {
 						disableForCurrentSite();
@@ -61,12 +97,7 @@ export const FloatingTab = () => {
 				/>
 			</div>
 
-			<SidePanel
-				sideWidth={sideWidth}
-				isOpen={isOpen}
-				setIsOpen={setIsOpen}
-				activeTab={activeTab}
-			/>
+			<SidePanel sideWidth={sideWidth} isOpen={isOpen} setIsOpen={setIsOpen} />
 		</div>
 	);
 };

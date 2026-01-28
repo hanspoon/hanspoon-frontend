@@ -2,17 +2,17 @@ import logo from "../../../../public/logo.svg";
 import { Dropdown, type DropdownMenuItem } from "../common/Dropdown";
 
 interface HanspoonFloatingButtonProps {
-	handleMouseDown: (e: React.MouseEvent) => void;
+	// handleMouseDown: (e: React.MouseEvent) => void;
 	isDragging: boolean;
 	isHover: boolean;
-	hasMoved: boolean;
+	// hasMoved: boolean;
 	onClick: () => void;
 	onDisableForSite: () => void;
 	onDisableGlobally: () => void;
 }
 
 export const HanspoonFloatingButton = ({
-	handleMouseDown,
+	// handleMouseDown,
 	isDragging,
 	isHover,
 	onClick,
@@ -69,7 +69,7 @@ export const HanspoonFloatingButton = ({
 			/>
 			<button
 				type="button"
-				onMouseDown={handleMouseDown}
+				// onMouseDown={handleMouseDown}
 				onClick={onClick}
 				style={{
 					width: "52px",
