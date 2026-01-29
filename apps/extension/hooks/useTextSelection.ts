@@ -39,16 +39,16 @@ export function useTextSelection(target?: HTMLElement) {
 		let newRect: ClientRect | undefined;
 
 		const rects = range.getClientRects();
-		if (rects.length === 0 && range.commonAncestorContainer != null) {
-			if (isElement(range.commonAncestorContainer)) {
-				newRect = roundValues(
-					range.commonAncestorContainer.getBoundingClientRect().toJSON(),
-				);
-			} else {
-				if (rects.length > 0) {
-					newRect = roundValues(rects[0].toJSON());
-				}
-			}
+
+		if (rects.length > 0) {
+			newRect = roundValues(rects[0].toJSON());
+		} else if (
+			range.commonAncestorContainer !== null &&
+			isElement(range.commonAncestorContainer)
+		) {
+			newRect = roundValues(
+				range.commonAncestorContainer.getBoundingClientRect().toJSON(),
+			);
 		}
 
 		setState((prevState) => {
