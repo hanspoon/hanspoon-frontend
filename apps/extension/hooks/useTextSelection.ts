@@ -41,10 +41,13 @@ export function useTextSelection() {
 		}
 
 		setState((prevState) => {
-			const isRectChanged =
-				newRect && prevState.clientRect
-					? shallowDiff(prevState.clientRect, newRect)
-					: newRect !== prevState.clientRect;
+			let isRectChanged: boolean;
+
+			if (newRect && prevState.clientRect) {
+				isRectChanged = shallowDiff(prevState.clientRect, newRect);
+			} else {
+				isRectChanged = newRect !== prevState.clientRect;
+			}
 
 			const isCollapsedChanged = prevState.isCollapsed !== range.collapsed;
 
