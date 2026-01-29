@@ -1,10 +1,10 @@
-import { useTextSelection } from "@/hooks/useTextSelection";
 import { useFloatingButtonStatus } from "../../hooks/useFloatingButtonStatus";
+import { useSelectionBounds } from "../../hooks/useSelectionBounds";
 import { CreationModeUI } from "./CreationModeUI";
 import { EditModeUI } from "./EditModeUI";
 
 export const Toolbar = () => {
-	const { clientRect, isCollapsed, range } = useTextSelection();
+	const { clientRect, isCollapsed, range } = useSelectionBounds();
 	const { isEnabledForCurrentSite } = useFloatingButtonStatus();
 
 	const enabled = isEnabledForCurrentSite();
