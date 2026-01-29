@@ -1,5 +1,6 @@
 import { deleteHighlight } from "@/apis/fetcher";
 import { removeHighlight } from "@/lib/highlight/remove";
+import { useHighlightSelection } from "../../hooks/useHighlightSelection";
 
 export const EditModeUI = () => {
 	const { clickedHighlight, clearHighlightSelection } = useHighlightSelection();

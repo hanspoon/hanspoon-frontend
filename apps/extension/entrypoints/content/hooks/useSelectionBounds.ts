@@ -10,7 +10,7 @@ type TextSelectionState = {
 
 const defaultState: TextSelectionState = {};
 
-export function useTextSelection() {
+export function useSelectionBounds() {
 	const [{ clientRect, isCollapsed, range }, setState] =
 		useState<TextSelectionState>(defaultState);
 

@@ -1,5 +1,5 @@
 import { createHighlight, createPost, getPostByUrl } from "@/apis/fetcher";
-import type { ClientRect } from "@/hooks/useTextSelection";
+import type { ClientRect } from "@/entrypoints/content/hooks/useSelectionBounds";
 import { appendHighlightTag, generateId } from "@/lib/highlight/highlight";
 import { serializeRange } from "@/lib/highlight/serialization";
 import { extractPostData } from "@/lib/post/postExtractor";
