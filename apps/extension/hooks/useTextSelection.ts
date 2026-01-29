@@ -10,33 +10,22 @@ type TextSelectionState = {
 
 const defaultState: TextSelectionState = {};
 
-export function useTextSelection(target?: HTMLElement) {
+export function useTextSelection() {
 	const [{ clientRect, isCollapsed, range }, setState] =
 		useState<TextSelectionState>(defaultState);
 
 	const handler = useCallback(() => {
 		const selection = window.getSelection();
 
-		if (selection == null || !selection.rangeCount) {
+		if (selection === null || selection.rangeCount === 0) {
 			setState(defaultState);
 			return;
 		}
 
 		const range = selection.getRangeAt(0);
-
-		if (target != null && !target.contains(range.commonAncestorContainer)) {
-			setState(defaultState);
-			return;
-		}
-
-		if (range == null) {
-			setState(defaultState);
-			return;
-		}
-
-		let newRect: ClientRect | undefined;
-
 		const rects = range.getClientRects();
+
+		let newRect: ClientRect;
 
 		if (rects.length > 0) {
 			newRect = roundValues(rects[0].toJSON());
@@ -47,6 +36,8 @@ export function useTextSelection(target?: HTMLElement) {
 			newRect = roundValues(
 				range.commonAncestorContainer.getBoundingClientRect().toJSON(),
 			);
+		} else {
+			return;
 		}
 
 		setState((prevState) => {
@@ -67,7 +58,7 @@ export function useTextSelection(target?: HTMLElement) {
 				isCollapsed: range.collapsed,
 			};
 		});
-	}, [target]);
+	}, []);
 
 	useLayoutEffect(() => {
 		document.addEventListener("selectionchange", handler);
