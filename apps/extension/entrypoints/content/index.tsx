@@ -1,6 +1,5 @@
-import { Toolbar } from "@/entrypoints/content/components/toolbar/Toolbar";
-import "@/lib/metrics/syncMetrics";
 import ReactDOM from "react-dom/client";
+import { Toolbar } from "@/entrypoints/content/components/toolbar/Toolbar";
 import { highlightSyncStore } from "@/lib/sync/highlightSyncStore";
 import "./style.css";
 import { Provider } from "jotai";
