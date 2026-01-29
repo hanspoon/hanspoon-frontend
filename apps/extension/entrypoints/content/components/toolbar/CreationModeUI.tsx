@@ -4,13 +4,12 @@ import { appendHighlightTag, generateId } from "@/lib/highlight/highlight";
 import { serializeRange } from "@/lib/highlight/serialization";
 import { extractPostData } from "@/lib/post/postExtractor";
 
-export const CreationModeUI = ({
-	targetRect,
-	range,
-}: {
+interface CreationModeUIProps {
 	targetRect: ClientRect;
 	range: Range;
-}) => {
+}
+
+export const CreationModeUI = ({ targetRect, range }: CreationModeUIProps) => {
 	const { top, left } = calculatePosition(targetRect);
 
 	return (
@@ -40,6 +39,7 @@ export const CreationModeUI = ({
 						const post = await ensurePostbyUrl(window.location.href);
 
 						const highlightId = generateId();
+
 						await createHighlight({
 							data: serializeRange({
 								range,
@@ -53,11 +53,6 @@ export const CreationModeUI = ({
 					} catch (error) {
 						console.error("Failed to save highlight:", error);
 					}
-				}}
-				style={{
-					background: "none",
-					border: "none",
-					cursor: "pointer",
 				}}
 			>
 				Highlight
