@@ -2,28 +2,6 @@ import { useCallback, useLayoutEffect, useState } from "react";
 
 export type ClientRect = Record<keyof Omit<DOMRect, "toJSON">, number>;
 
-function roundValues(_rect: ClientRect) {
-	const rect = { ..._rect };
-	for (const key of Object.keys(rect)) {
-		// @ts-expect-error type casting issue
-		rect[key] = Math.round(rect[key]);
-	}
-	return rect;
-}
-
-function shallowDiff(prev: any, next: any) {
-	if (prev != null && next != null) {
-		for (const key of Object.keys(next)) {
-			if (prev[key] !== next[key]) {
-				return true;
-			}
-		}
-	} else if (prev !== next) {
-		return true;
-	}
-	return false;
-}
-
 type TextSelectionState = {
 	clientRect?: ClientRect;
 	isCollapsed?: boolean;
@@ -62,11 +40,14 @@ export function useTextSelection(target?: HTMLElement) {
 
 		const rects = range.getClientRects();
 		if (rects.length === 0 && range.commonAncestorContainer != null) {
-			const el = range.commonAncestorContainer as HTMLElement;
-			newRect = roundValues(el.getBoundingClientRect().toJSON());
-		} else {
-			if (rects.length > 0) {
-				newRect = roundValues(rects[0].toJSON());
+			if (isElement(range.commonAncestorContainer)) {
+				newRect = roundValues(
+					range.commonAncestorContainer.getBoundingClientRect().toJSON(),
+				);
+			} else {
+				if (rects.length > 0) {
+					newRect = roundValues(rects[0].toJSON());
+				}
 			}
 		}
 
@@ -112,4 +93,36 @@ export function useTextSelection(target?: HTMLElement) {
 		textContent,
 		range,
 	};
+}
+
+function shallowDiff<T extends Record<string, unknown>>(
+	prev: T | undefined,
+	next: T | undefined,
+): boolean {
+	if (prev == null || next == null) {
+		return prev !== next;
+	}
+	for (const key of Object.keys(next) as Array<keyof T>) {
+		if (prev[key] !== next[key]) {
+			return true;
+		}
+	}
+	return false;
+}
+
+function roundValues(rect: ClientRect): ClientRect {
+	return {
+		top: Math.round(rect.top),
+		right: Math.round(rect.right),
+		bottom: Math.round(rect.bottom),
+		left: Math.round(rect.left),
+		width: Math.round(rect.width),
+		height: Math.round(rect.height),
+		x: Math.round(rect.x),
+		y: Math.round(rect.y),
+	};
+}
+
+function isElement(node: Node): node is Element {
+	return node.nodeType === Node.ELEMENT_NODE;
 }
