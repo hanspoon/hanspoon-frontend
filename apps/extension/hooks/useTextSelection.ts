@@ -5,14 +5,13 @@ export type ClientRect = Record<keyof Omit<DOMRect, "toJSON">, number>;
 type TextSelectionState = {
 	clientRect?: ClientRect;
 	isCollapsed?: boolean;
-	textContent?: string;
 	range?: Range;
 };
 
 const defaultState: TextSelectionState = {};
 
 export function useTextSelection(target?: HTMLElement) {
-	const [{ clientRect, isCollapsed, textContent, range }, setState] =
+	const [{ clientRect, isCollapsed, range }, setState] =
 		useState<TextSelectionState>(defaultState);
 
 	const handler = useCallback(() => {
@@ -35,7 +34,6 @@ export function useTextSelection(target?: HTMLElement) {
 			return;
 		}
 
-		const newTextContent = range.toString();
 		let newRect: ClientRect | undefined;
 
 		const rects = range.getClientRects();
@@ -57,17 +55,15 @@ export function useTextSelection(target?: HTMLElement) {
 					? shallowDiff(prevState.clientRect, newRect)
 					: newRect !== prevState.clientRect;
 
-			const textChanged = prevState.textContent !== newTextContent;
 			const collapsedChanged = prevState.isCollapsed !== range.collapsed;
 
-			if (!rectChanged && !textChanged && !collapsedChanged) {
+			if (!rectChanged && !collapsedChanged) {
 				return prevState;
 			}
 
 			return {
 				range,
 				clientRect: newRect,
-				textContent: newTextContent,
 				isCollapsed: range.collapsed,
 			};
 		});
@@ -90,7 +86,6 @@ export function useTextSelection(target?: HTMLElement) {
 	return {
 		clientRect,
 		isCollapsed,
-		textContent,
 		range,
 	};
 }
