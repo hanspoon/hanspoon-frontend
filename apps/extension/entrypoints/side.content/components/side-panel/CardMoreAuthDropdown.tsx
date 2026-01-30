@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { syncPostToSupabase } from "@/lib/sync/syncPostToSupabase";
 import type { LocalPost } from "@/lib/highlight/types";
+import { syncPostToSupabase } from "@/lib/sync/syncPostToSupabase";
 import {
 	deleteAllHighlightsByPostId,
 	deletePost,
+	syncEnqueue,
 	updatePost,
 } from "../../../../apis/fetcher";
 import menuDots from "../../../../public/menu-dots.svg";
@@ -37,6 +38,14 @@ export const CardMoreAuthDropdown = ({ post }: CardMoreAuthDropdownProps) => {
 				showToast("공유 준비에 실패했습니다.", "error");
 				return;
 			}
+		} else {
+			try {
+				await syncEnqueue(post.id, "delete");
+			} catch (error) {
+				console.error("Supabase 삭제 요청 실패:", error);
+				showToast("공유 취소에 실패했습니다.", "error");
+				return;
+			}
 		}
 
 		setIsPublished(newPublishState);
@@ -44,7 +53,7 @@ export const CardMoreAuthDropdown = ({ post }: CardMoreAuthDropdownProps) => {
 		try {
 			await updatePost({
 				postId: post.id,
-				updates: { isPublished: newPublishState },
+				updates: { isPublished: newPublishState, isSynced: newPublishState },
 			});
 		} catch (error) {
 			console.error("포스트 업데이트 실패:", error);
@@ -83,6 +92,9 @@ export const CardMoreAuthDropdown = ({ post }: CardMoreAuthDropdownProps) => {
 	const handleConfirmDelete = async () => {
 		setIsDeleteModalOpen(false);
 		try {
+			if (isPublished) {
+				await syncEnqueue(post.id, "delete");
+			}
 			await deleteAllHighlightsByPostId(post.id);
 			await deletePost(post.id);
 			showToast("포스트가 삭제되었습니다.", "success");

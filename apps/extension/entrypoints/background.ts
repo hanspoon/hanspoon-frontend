@@ -3,6 +3,7 @@ import type {
 	LocalPost,
 	SerializedHighlight,
 } from "../lib/highlight/types";
+import { syncQueue } from "../lib/sync/syncQueue";
 import { db } from "../models/db";
 import { onMessage } from "../utils/message";
 
@@ -128,6 +129,14 @@ const saveLoginSessionBackground = async (session: unknown) => {
 export default defineBackground({
 	type: "module",
 	main() {
+		self.addEventListener("online", () => {
+			syncQueue.retryFailed();
+		});
+
+		if (navigator.onLine) {
+			syncQueue.retryFailed();
+		}
+
 		// 하이라이트
 		onMessage("DB_CREATE_HIGHLIGHT", async (message) => {
 			const { data, postId } = message.data;
@@ -139,6 +148,11 @@ export default defineBackground({
 				postId,
 				timestamp: performance.timeOrigin + performance.now(),
 			});
+
+			const post = await db.posts.get(postId);
+			if (post?.isPublished) {
+				await syncQueue.enqueue(postId, "upsert");
+			}
 
 			return { success: true };
 		});
@@ -162,6 +176,9 @@ export default defineBackground({
 
 		onMessage("DB_DELETE_HIGHLIGHT", async (message) => {
 			const { id } = message.data;
+
+			const annotation = await db.annotations.get(id);
+
 			await deleteHighlightBackground(id);
 
 			broadcastToAll({
@@ -169,6 +186,13 @@ export default defineBackground({
 				id,
 				timestamp: performance.timeOrigin + performance.now(),
 			});
+
+			if (annotation) {
+				const post = await db.posts.get(annotation.postId);
+				if (post?.isPublished) {
+					await syncQueue.enqueue(annotation.postId, "upsert");
+				}
+			}
 
 			return { success: true };
 		});
@@ -241,6 +265,13 @@ export default defineBackground({
 			const { session } = message.data;
 			const result = await saveLoginSessionBackground(session);
 			return result;
+		});
+
+		// 동기화
+		onMessage("SYNC_ENQUEUE", async (message) => {
+			const { postId, action } = message.data;
+			await syncQueue.enqueue(postId, action);
+			return { success: true };
 		});
 
 		browser.runtime.onMessageExternal.addListener(
