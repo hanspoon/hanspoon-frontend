@@ -16,7 +16,7 @@ const BOOKMARK_CELLS = 4;
 
 export const SharePage = () => {
 	return (
-		<ErrorBoundary fallback={null}>
+		<ErrorBoundary fallback={<NotFoundFallback />}>
 			<div
 				style={{
 					padding: "64px",
@@ -211,3 +211,44 @@ function convertToTextFragmentUrl(highlightText: string): string {
 
 	return `${fragmentParams}`;
 }
+
+const NotFoundFallback = () => (
+	<div
+		style={{
+			display: "flex",
+			flexDirection: "column",
+			alignItems: "center",
+			justifyContent: "center",
+			minHeight: "100vh",
+			padding: "24px",
+			textAlign: "center",
+		}}
+	>
+		<div
+			style={{
+				marginBottom: "24px",
+			}}
+		>
+			<img src="/logo.svg" alt="logo" width={64} height={64} />
+		</div>
+		<h1
+			style={{
+				fontSize: "24px",
+				fontWeight: "700",
+				color: "#1a1a1a",
+				marginBottom: "12px",
+			}}
+		>
+			공유가 중단되었어요
+		</h1>
+		<p
+			style={{
+				fontSize: "16px",
+				color: "#6b7280",
+				lineHeight: "1.6",
+			}}
+		>
+			이 페이지는 삭제되었거나, 작성자가 공유를 취소했어요
+		</p>
+	</div>
+);

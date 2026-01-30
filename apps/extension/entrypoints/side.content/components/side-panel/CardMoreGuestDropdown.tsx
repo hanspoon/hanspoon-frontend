@@ -1,6 +1,6 @@
-import { createClient } from "@supabase/supabase-js";
 import { useState } from "react";
 import type { LocalPost } from "@/lib/highlight/types";
+import { supabase } from "@/lib/supabase/supabas";
 import {
 	deleteAllHighlightsByPostId,
 	deletePost,
@@ -9,11 +9,6 @@ import menuDots from "../../../../public/menu-dots.svg";
 import { Dropdown, type DropdownMenuItem } from "../common/Dropdown";
 import { Modal } from "../common/Modal";
 import { useToast } from "../common/Toast";
-
-const supabase = createClient(
-	import.meta.env.VITE_SUPABASE_URL,
-	import.meta.env.VITE_SUPABASE_ANON_KEY,
-);
 
 interface CardMoreGuestDropdownProps {
 	post: LocalPost;
@@ -34,8 +29,8 @@ export const CardMoreGuestDropdown = ({ post }: CardMoreGuestDropdownProps) => {
 						prompt: "consent",
 					},
 					redirectTo: import.meta.env.DEV
-					? "http://localhost:5173/auth/callback"
-					: "https://hanspoon.vercel.app/auth/callback",
+						? "http://localhost:5173/auth/callback"
+						: "https://hanspoon.vercel.app/auth/callback",
 					skipBrowserRedirect: true,
 				},
 			});

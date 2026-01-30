@@ -41,3 +41,14 @@ export interface LocalPost {
 	isSynced: boolean;
 	isPublished: boolean;
 }
+
+export interface SyncQueueItem {
+	id: UUID;
+	postId: UUID;
+	action: "upsert" | "delete";
+	status: "pending" | "processing" | "failed";
+	retryCount: number;
+	createdAt: number;
+	lastAttempt?: number;
+	error?: string;
+}
