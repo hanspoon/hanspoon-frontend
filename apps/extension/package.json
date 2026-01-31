@@ -22,6 +22,7 @@
 		"dexie": "^4.2.1",
 		"dexie-react-hooks": "^4.2.0",
 		"jotai": "^2.16.1",
+		"posthog-js": "^1.336.4",
 		"react": "^19.1.1",
 		"react-dom": "^19.1.1",
 		"tailwindcss": "^4.1.17"
