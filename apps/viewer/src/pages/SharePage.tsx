@@ -1,6 +1,7 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Suspense, useMemo } from "react";
 import { ErrorBoundary } from "react-error-boundary";
+import { useIsMobile } from "../hooks/useIsMobile";
 import { useShareId } from "../hooks/useShareId";
 import { annotationQueryOptions } from "../queries/annotation";
 import { postQueryOptions } from "../queries/post";
@@ -9,17 +10,31 @@ import type { Database } from "../types/database.types";
 type AnnotationRow = Database["public"]["Tables"]["annotations"]["Row"];
 type PostRow = Database["public"]["Tables"]["posts"]["Row"];
 
-const GRID_COLS = 5;
-const GRID_ROWS = 5;
-const TOTAL_CELLS = GRID_COLS * GRID_ROWS;
-const BOOKMARK_CELLS = 4;
+const getGridConfig = (isMobile: boolean) =>
+	isMobile
+		? { cols: 2, rows: 4, bookmarkCells: 2 }
+		: { cols: 5, rows: 5, bookmarkCells: 4 };
+
+const EMPTY_CELL_COLORS = [
+	"#f0f0f0",
+	"#e8e8e8",
+	"#f4f4f4",
+	"#ececec",
+	"#f2f2f2",
+	"#eaeaea",
+];
+
+const getEmptyCellColor = (index: number) =>
+	EMPTY_CELL_COLORS[index % EMPTY_CELL_COLORS.length];
 
 export const SharePage = () => {
+	const isMobile = useIsMobile();
+
 	return (
 		<ErrorBoundary fallback={<NotFoundFallback />}>
 			<div
 				style={{
-					padding: "64px",
+					padding: isMobile ? "24px 16px" : "64px",
 					display: "flex",
 					justifyContent: "center",
 					alignItems: "center",
@@ -40,9 +55,12 @@ const SharedPageContent = () => {
 	const { data: highlights } = useSuspenseQuery(
 		annotationQueryOptions(currentShareId),
 	);
+	const isMobile = useIsMobile();
+	const { cols, rows, bookmarkCells } = getGridConfig(isMobile);
+	const totalCells = cols * rows;
 
 	const gridItems = useMemo(() => {
-		const availableCells = TOTAL_CELLS - BOOKMARK_CELLS;
+		const availableCells = totalCells - bookmarkCells;
 
 		const cells: Array<{ text: string | null; id: string }> = Array.from(
 			{ length: availableCells },
@@ -64,37 +82,39 @@ const SharedPageContent = () => {
 		});
 
 		return cells;
-	}, [highlights]);
+	}, [highlights, totalCells, bookmarkCells]);
 
 	return (
 		<div
 			style={{
 				display: "grid",
-				gridTemplateColumns: `repeat(${GRID_COLS}, 1fr)`,
-				gridTemplateRows: `repeat(${GRID_ROWS}, 1fr)`,
-				gap: "12px",
+				gridTemplateColumns: `repeat(${cols}, 1fr)`,
+				gridTemplateRows: `repeat(${rows}, 1fr)`,
+				gap: isMobile ? "8px" : "12px",
 				width: "100%",
-				maxWidth: "1000px",
-				aspectRatio: "1/1",
+				maxWidth: isMobile ? "400px" : "1000px",
+				aspectRatio: isMobile ? "1/2" : "1/1",
 			}}
 			className="shared-page-grid"
 		>
 			{/* Bookmark */}
 			<a
 				href={getShareableLink(highlights, post)}
+				className="bookmark-card grid-item-enter"
 				style={{
-					gridColumn: "1 / 3",
-					gridRow: "1 / 3",
+					gridColumn: isMobile ? "1 / 3" : "1 / 3",
+					gridRow: isMobile ? "1 / 2" : "1 / 3",
 					border: "1px solid #e5e5e5",
-					borderRadius: "24px",
+					borderRadius: isMobile ? "16px" : "24px",
 					display: "flex",
 					flexDirection: "column",
 					justifyContent: "space-between",
-					padding: "24px",
+					padding: isMobile ? "16px" : "24px",
 					textDecoration: "none",
 					color: "inherit",
 					backgroundColor: "#fff",
 					overflow: "hidden",
+					animationDelay: "0ms",
 				}}
 			>
 				<div>
@@ -103,7 +123,7 @@ const SharedPageContent = () => {
 							display: "flex",
 							alignItems: "center",
 							gap: "8px",
-							marginBottom: "16px",
+							marginBottom: isMobile ? "8px" : "16px",
 						}}
 					>
 						{post.fav_icon_url && (
@@ -117,13 +137,13 @@ const SharedPageContent = () => {
 								}}
 							/>
 						)}
-						<span style={{ fontSize: "14px", color: "#495057" }}>
+						<span style={{ fontSize: isMobile ? "12px" : "14px", color: "#495057" }}>
 							{new URL(post.url).hostname}
 						</span>
 					</div>
 					<h3
 						style={{
-							fontSize: "18px",
+							fontSize: isMobile ? "14px" : "18px",
 							fontWeight: "700",
 							margin: 0,
 							lineHeight: "1.5",
@@ -134,29 +154,31 @@ const SharedPageContent = () => {
 				</div>
 			</a>
 
-			{gridItems.map((item) => (
+			{gridItems.map((item, index) => (
 				<div
 					key={item.id}
+					className={`grid-item-enter${item.text ? "" : " empty-cell"}`}
 					style={{
 						border: "1px solid #EBEBEB",
-						borderRadius: "24px",
-						padding: "16px",
-						backgroundColor: item.text ? "#fff" : "#EBEBEB",
+						borderRadius: isMobile ? "16px" : "24px",
+						padding: isMobile ? "12px" : "16px",
+						backgroundColor: item.text ? "#fff" : getEmptyCellColor(index),
 						display: "flex",
 						alignItems: "flex-start",
 						justifyContent: "flex-start",
-						fontSize: "13px",
+						fontSize: isMobile ? "12px" : "13px",
 						lineHeight: "1.6",
 						overflow: "hidden",
 						wordBreak: "keep-all",
 						textAlign: "center",
+						animationDelay: `${(index + 1) * 30}ms`,
 					}}
 				>
 					{item.text && (
 						<span
 							style={{
 								display: "-webkit-box",
-								WebkitLineClamp: 4,
+								WebkitLineClamp: isMobile ? 3 : 4,
 								WebkitBoxOrient: "vertical",
 								overflow: "hidden",
 								textOverflow: "ellipsis",
