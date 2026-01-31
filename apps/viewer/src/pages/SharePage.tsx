@@ -1,5 +1,5 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { Suspense, useMemo } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { useShareId } from "../hooks/useShareId";
 import { annotationQueryOptions } from "../queries/annotation";
@@ -9,17 +9,36 @@ import type { Database } from "../types/database.types";
 type AnnotationRow = Database["public"]["Tables"]["annotations"]["Row"];
 type PostRow = Database["public"]["Tables"]["posts"]["Row"];
 
-const GRID_COLS = 5;
-const GRID_ROWS = 5;
-const TOTAL_CELLS = GRID_COLS * GRID_ROWS;
-const BOOKMARK_CELLS = 4;
+const MOBILE_BREAKPOINT = 768;
+
+const useGridConfig = () => {
+	const [isMobile, setIsMobile] = useState(
+		typeof window !== "undefined" && window.innerWidth < MOBILE_BREAKPOINT,
+	);
+
+	useEffect(() => {
+		const handleResize = () => {
+			setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
+		};
+
+		window.addEventListener("resize", handleResize);
+		return () => window.removeEventListener("resize", handleResize);
+	}, []);
+
+	return isMobile
+		? { cols: 2, rows: 4, bookmarkCells: 2 }
+		: { cols: 5, rows: 5, bookmarkCells: 4 };
+};
 
 export const SharePage = () => {
+	const { cols } = useGridConfig();
+	const isMobile = cols === 2;
+
 	return (
 		<ErrorBoundary fallback={<NotFoundFallback />}>
 			<div
 				style={{
-					padding: "64px",
+					padding: isMobile ? "24px 16px" : "64px",
 					display: "flex",
 					justifyContent: "center",
 					alignItems: "center",
@@ -40,9 +59,13 @@ const SharedPageContent = () => {
 	const { data: highlights } = useSuspenseQuery(
 		annotationQueryOptions(currentShareId),
 	);
+	const gridConfig = useGridConfig();
+	const { cols, rows, bookmarkCells } = gridConfig;
+	const totalCells = cols * rows;
+	const isMobile = cols === 2;
 
 	const gridItems = useMemo(() => {
-		const availableCells = TOTAL_CELLS - BOOKMARK_CELLS;
+		const availableCells = totalCells - bookmarkCells;
 
 		const cells: Array<{ text: string | null; id: string }> = Array.from(
 			{ length: availableCells },
@@ -64,18 +87,18 @@ const SharedPageContent = () => {
 		});
 
 		return cells;
-	}, [highlights]);
+	}, [highlights, totalCells, bookmarkCells]);
 
 	return (
 		<div
 			style={{
 				display: "grid",
-				gridTemplateColumns: `repeat(${GRID_COLS}, 1fr)`,
-				gridTemplateRows: `repeat(${GRID_ROWS}, 1fr)`,
-				gap: "12px",
+				gridTemplateColumns: `repeat(${cols}, 1fr)`,
+				gridTemplateRows: `repeat(${rows}, 1fr)`,
+				gap: isMobile ? "8px" : "12px",
 				width: "100%",
-				maxWidth: "1000px",
-				aspectRatio: "1/1",
+				maxWidth: isMobile ? "400px" : "1000px",
+				aspectRatio: isMobile ? "1/2" : "1/1",
 			}}
 			className="shared-page-grid"
 		>
@@ -83,14 +106,14 @@ const SharedPageContent = () => {
 			<a
 				href={getShareableLink(highlights, post)}
 				style={{
-					gridColumn: "1 / 3",
-					gridRow: "1 / 3",
+					gridColumn: isMobile ? "1 / 3" : "1 / 3",
+					gridRow: isMobile ? "1 / 2" : "1 / 3",
 					border: "1px solid #e5e5e5",
-					borderRadius: "24px",
+					borderRadius: isMobile ? "16px" : "24px",
 					display: "flex",
 					flexDirection: "column",
 					justifyContent: "space-between",
-					padding: "24px",
+					padding: isMobile ? "16px" : "24px",
 					textDecoration: "none",
 					color: "inherit",
 					backgroundColor: "#fff",
@@ -103,7 +126,7 @@ const SharedPageContent = () => {
 							display: "flex",
 							alignItems: "center",
 							gap: "8px",
-							marginBottom: "16px",
+							marginBottom: isMobile ? "8px" : "16px",
 						}}
 					>
 						{post.fav_icon_url && (
@@ -117,13 +140,13 @@ const SharedPageContent = () => {
 								}}
 							/>
 						)}
-						<span style={{ fontSize: "14px", color: "#495057" }}>
+						<span style={{ fontSize: isMobile ? "12px" : "14px", color: "#495057" }}>
 							{new URL(post.url).hostname}
 						</span>
 					</div>
 					<h3
 						style={{
-							fontSize: "18px",
+							fontSize: isMobile ? "14px" : "18px",
 							fontWeight: "700",
 							margin: 0,
 							lineHeight: "1.5",
@@ -139,13 +162,13 @@ const SharedPageContent = () => {
 					key={item.id}
 					style={{
 						border: "1px solid #EBEBEB",
-						borderRadius: "24px",
-						padding: "16px",
+						borderRadius: isMobile ? "16px" : "24px",
+						padding: isMobile ? "12px" : "16px",
 						backgroundColor: item.text ? "#fff" : "#EBEBEB",
 						display: "flex",
 						alignItems: "flex-start",
 						justifyContent: "flex-start",
-						fontSize: "13px",
+						fontSize: isMobile ? "12px" : "13px",
 						lineHeight: "1.6",
 						overflow: "hidden",
 						wordBreak: "keep-all",
@@ -156,7 +179,7 @@ const SharedPageContent = () => {
 						<span
 							style={{
 								display: "-webkit-box",
-								WebkitLineClamp: 4,
+								WebkitLineClamp: isMobile ? 3 : 4,
 								WebkitBoxOrient: "vertical",
 								overflow: "hidden",
 								textOverflow: "ellipsis",
