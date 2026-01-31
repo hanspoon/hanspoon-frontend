@@ -1,6 +1,7 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useMemo } from "react";
 import { ErrorBoundary } from "react-error-boundary";
+import { useIsMobile } from "../hooks/useIsMobile";
 import { useShareId } from "../hooks/useShareId";
 import { annotationQueryOptions } from "../queries/annotation";
 import { postQueryOptions } from "../queries/post";
@@ -9,30 +10,13 @@ import type { Database } from "../types/database.types";
 type AnnotationRow = Database["public"]["Tables"]["annotations"]["Row"];
 type PostRow = Database["public"]["Tables"]["posts"]["Row"];
 
-const MOBILE_BREAKPOINT = 768;
-
-const useGridConfig = () => {
-	const [isMobile, setIsMobile] = useState(
-		typeof window !== "undefined" && window.innerWidth < MOBILE_BREAKPOINT,
-	);
-
-	useEffect(() => {
-		const handleResize = () => {
-			setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
-		};
-
-		window.addEventListener("resize", handleResize);
-		return () => window.removeEventListener("resize", handleResize);
-	}, []);
-
-	return isMobile
+const getGridConfig = (isMobile: boolean) =>
+	isMobile
 		? { cols: 2, rows: 4, bookmarkCells: 2 }
 		: { cols: 5, rows: 5, bookmarkCells: 4 };
-};
 
 export const SharePage = () => {
-	const { cols } = useGridConfig();
-	const isMobile = cols === 2;
+	const isMobile = useIsMobile();
 
 	return (
 		<ErrorBoundary fallback={<NotFoundFallback />}>
@@ -59,10 +43,9 @@ const SharedPageContent = () => {
 	const { data: highlights } = useSuspenseQuery(
 		annotationQueryOptions(currentShareId),
 	);
-	const gridConfig = useGridConfig();
-	const { cols, rows, bookmarkCells } = gridConfig;
+	const isMobile = useIsMobile();
+	const { cols, rows, bookmarkCells } = getGridConfig(isMobile);
 	const totalCells = cols * rows;
-	const isMobile = cols === 2;
 
 	const gridItems = useMemo(() => {
 		const availableCells = totalCells - bookmarkCells;
