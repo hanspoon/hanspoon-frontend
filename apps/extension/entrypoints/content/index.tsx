@@ -1,5 +1,6 @@
 import ReactDOM from "react-dom/client";
 import { Toolbar } from "@/entrypoints/content/components/toolbar/Toolbar";
+import { initPostHog } from "@/lib/analytics/posthog";
 import { highlightSyncStore } from "@/lib/sync/highlightSyncStore";
 import "./style.css";
 import { Provider } from "jotai";
@@ -9,6 +10,7 @@ export default defineContentScript({
 	cssInjectionMode: "ui",
 
 	async main(ctx) {
+		initPostHog();
 		highlightSyncStore.initializeForUrl(window.location.href);
 
 		const ui = await createShadowRootUi(ctx, {

@@ -1,3 +1,4 @@
+import { trackEvent } from "@/lib/analytics/posthog";
 import type {
 	LocalAnnotation,
 	LocalPost,
@@ -17,6 +18,8 @@ export const createHighlight = async ({
 	if (!response?.success) {
 		throw new Error(`[HighlightService] Failed to create: DB_CREATE_HIGHLIGHT`);
 	}
+
+	trackEvent("highlight_created", { postId, highlightId: data.id });
 
 	return { postId };
 };
@@ -71,6 +74,8 @@ export const deleteHighlight = async (id: string) => {
 	if (!response?.success) {
 		throw new Error(`[HighlightService] Failed to delete: DB_DELETE_HIGHLIGHT`);
 	}
+
+	trackEvent("highlight_deleted", { highlightId: id });
 };
 
 export const deleteAllHighlightsByPostId = async (postId: string) => {
@@ -92,6 +97,8 @@ export const createPost = async (data: LocalPost) => {
 	if (!response?.success) {
 		throw new Error(`[HighlightService] Failed to create: DB_CREATE_POST`);
 	}
+
+	trackEvent("post_created", { postId: data.id });
 
 	return data;
 };
@@ -144,6 +151,8 @@ export const deletePost = async (postId: string) => {
 	if (!response?.success) {
 		throw Error(`[HighlightService] Failed to delete: DB_DELETE_POST`);
 	}
+
+	trackEvent("post_deleted", { postId });
 };
 
 // 로그인
@@ -164,5 +173,9 @@ export const syncEnqueue = async (
 
 	if (!response?.success) {
 		throw Error(`[SyncService] Failed to enqueue: SYNC_ENQUEUE`);
+	}
+
+	if (action === "upsert") {
+		trackEvent("post_synced", { postId });
 	}
 };
