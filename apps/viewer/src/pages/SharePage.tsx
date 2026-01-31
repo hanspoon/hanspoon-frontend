@@ -15,6 +15,18 @@ const getGridConfig = (isMobile: boolean) =>
 		? { cols: 2, rows: 4, bookmarkCells: 2 }
 		: { cols: 5, rows: 5, bookmarkCells: 4 };
 
+const EMPTY_CELL_COLORS = [
+	"#f0f0f0",
+	"#e8e8e8",
+	"#f4f4f4",
+	"#ececec",
+	"#f2f2f2",
+	"#eaeaea",
+];
+
+const getEmptyCellColor = (index: number) =>
+	EMPTY_CELL_COLORS[index % EMPTY_CELL_COLORS.length];
+
 export const SharePage = () => {
 	const isMobile = useIsMobile();
 
@@ -88,6 +100,7 @@ const SharedPageContent = () => {
 			{/* Bookmark */}
 			<a
 				href={getShareableLink(highlights, post)}
+				className="bookmark-card grid-item-enter"
 				style={{
 					gridColumn: isMobile ? "1 / 3" : "1 / 3",
 					gridRow: isMobile ? "1 / 2" : "1 / 3",
@@ -101,6 +114,7 @@ const SharedPageContent = () => {
 					color: "inherit",
 					backgroundColor: "#fff",
 					overflow: "hidden",
+					animationDelay: "0ms",
 				}}
 			>
 				<div>
@@ -140,14 +154,15 @@ const SharedPageContent = () => {
 				</div>
 			</a>
 
-			{gridItems.map((item) => (
+			{gridItems.map((item, index) => (
 				<div
 					key={item.id}
+					className={`grid-item-enter${item.text ? "" : " empty-cell"}`}
 					style={{
 						border: "1px solid #EBEBEB",
 						borderRadius: isMobile ? "16px" : "24px",
 						padding: isMobile ? "12px" : "16px",
-						backgroundColor: item.text ? "#fff" : "#EBEBEB",
+						backgroundColor: item.text ? "#fff" : getEmptyCellColor(index),
 						display: "flex",
 						alignItems: "flex-start",
 						justifyContent: "flex-start",
@@ -156,6 +171,7 @@ const SharedPageContent = () => {
 						overflow: "hidden",
 						wordBreak: "keep-all",
 						textAlign: "center",
+						animationDelay: `${(index + 1) * 30}ms`,
 					}}
 				>
 					{item.text && (
