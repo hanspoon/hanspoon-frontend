@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { LocalPost } from "@/lib/highlight/types";
-import { supabase } from "@/lib/supabase/supabas";
+import { supabase } from "@/lib/supabase/supabase";
 import {
 	deleteAllHighlightsByPostId,
 	deletePost,
