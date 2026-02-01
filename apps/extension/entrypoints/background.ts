@@ -1,9 +1,10 @@
+import type { Session } from "@supabase/supabase-js";
+import { initSupabaseSession, supabase } from "@/lib/supabase/supabase";
 import type {
 	LocalAnnotation,
 	LocalPost,
 	SerializedHighlight,
 } from "../lib/highlight/types";
-import { syncQueue } from "../lib/sync/syncQueue";
 import { db } from "../models/db";
 import { onMessage } from "../utils/message";
 
@@ -128,33 +129,51 @@ const saveLoginSessionBackground = async (session: unknown) => {
 
 export default defineBackground({
 	type: "module",
-	main() {
-		self.addEventListener("online", () => {
-			syncQueue.retryFailed();
-		});
-
-		if (navigator.onLine) {
-			syncQueue.retryFailed();
-		}
+	async main() {
+		await initSupabaseSession();
 
 		// 하이라이트
 		onMessage("DB_CREATE_HIGHLIGHT", async (message) => {
-			const { data, postId } = message.data;
-			await createHightLightBackground({ data, postId });
+			try {
+				const { data: highlight, postId } = message.data;
+				await createHightLightBackground({ data: highlight, postId });
 
-			broadcastToAll({
-				type: "HIGHLIGHT_CREATED",
-				id: data.id,
-				postId,
-				timestamp: performance.timeOrigin + performance.now(),
-			});
+				broadcastToAll({
+					type: "HIGHLIGHT_CREATED",
+					id: highlight.id,
+					postId,
+					timestamp: performance.timeOrigin + performance.now(),
+				});
 
-			const post = await db.posts.get(postId);
-			if (post?.isPublished) {
-				await syncQueue.enqueue(postId, "upsert");
+				const post = await db.posts.get(postId);
+
+				if (post?.isPublished) {
+					const { session } = await browser.storage.local.get<{
+						session: Session;
+					}>("session");
+
+					const { error } = await supabase.from("annotations").insert({
+						id: highlight.id,
+						post_id: post.id,
+						start_meta: highlight.start,
+						end_meta: highlight.end,
+						text: highlight.text,
+						user_id: session.user.id,
+						share_id: post.shareId,
+						updated_at: new Date().toISOString(),
+					});
+
+					if (error) {
+						throw error;
+					}
+
+					// await syncPostToSupabase(post.id, session);
+				}
+				return { success: true };
+			} catch (error) {
+				console.error("message: DB_CREATE_HIGHLIGHT failed", error);
+				return { success: false };
 			}
-
-			return { success: true };
 		});
 
 		onMessage("DB_UPDATE_ALL_HIGHLIGHTS_BY_POST_ID", async (message) => {
@@ -189,9 +208,9 @@ export default defineBackground({
 
 			if (annotation) {
 				const post = await db.posts.get(annotation.postId);
-				if (post?.isPublished) {
-					await syncQueue.enqueue(annotation.postId, "upsert");
-				}
+				// if (post?.isPublished) {
+				// 	await syncQueue.enqueue(annotation.postId, "delete");
+				// }
 			}
 
 			return { success: true };
@@ -270,7 +289,7 @@ export default defineBackground({
 		// 동기화
 		onMessage("SYNC_ENQUEUE", async (message) => {
 			const { postId, action } = message.data;
-			await syncQueue.enqueue(postId, action);
+			// await syncQueue.enqueue(postId, action);
 			return { success: true };
 		});
 
