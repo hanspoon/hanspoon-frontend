@@ -154,15 +154,3 @@ export const saveLoginSession = async (session: unknown) => {
 		throw Error(`[AuthService] Failed to save: LOGIN_SUCCESS`);
 	}
 };
-
-// 동기화
-export const syncEnqueue = async (
-	postId: string,
-	action: "upsert" | "delete",
-) => {
-	const response = await sendMessage("SYNC_ENQUEUE", { postId, action });
-
-	if (!response?.success) {
-		throw Error(`[SyncService] Failed to enqueue: SYNC_ENQUEUE`);
-	}
-};

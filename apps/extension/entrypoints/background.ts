@@ -298,13 +298,6 @@ export default defineBackground({
 			return result;
 		});
 
-		// 동기화
-		onMessage("SYNC_ENQUEUE", async (message) => {
-			const { postId, action } = message.data;
-			// await syncQueue.enqueue(postId, action);
-			return { success: true };
-		});
-
 		browser.runtime.onMessageExternal.addListener(
 			async (message, sender, sendResponse) => {
 				if (message.type === "LOGIN_SUCCESS") {

@@ -38,12 +38,6 @@ export interface DBProtocolMap {
 
 	// 로그인
 	LOGIN_SUCCESS: (data: { session: unknown }) => { success: boolean };
-
-	// 동기화
-	SYNC_ENQUEUE: (data: {
-		postId: string;
-		action: "upsert" | "delete";
-	}) => { success: boolean };
 }
 
 export const { sendMessage, onMessage } =
