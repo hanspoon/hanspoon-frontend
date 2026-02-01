@@ -194,26 +194,38 @@ export default defineBackground({
 		});
 
 		onMessage("DB_DELETE_HIGHLIGHT", async (message) => {
-			const { id } = message.data;
+			try {
+				const { id } = message.data;
 
-			const annotation = await db.annotations.get(id);
+				const annotation = await db.annotations.get(id);
 
-			await deleteHighlightBackground(id);
+				await deleteHighlightBackground(id);
 
-			broadcastToAll({
-				type: "HIGHLIGHT_DELETED",
-				id,
-				timestamp: performance.timeOrigin + performance.now(),
-			});
+				broadcastToAll({
+					type: "HIGHLIGHT_DELETED",
+					id,
+					timestamp: performance.timeOrigin + performance.now(),
+				});
 
-			if (annotation) {
-				const post = await db.posts.get(annotation.postId);
-				// if (post?.isPublished) {
-				// 	await syncQueue.enqueue(annotation.postId, "delete");
-				// }
+				if (annotation) {
+					const post = await db.posts.get(annotation.postId);
+					if (post?.isPublished) {
+						const { error } = await supabase
+							.from("annotations")
+							.delete()
+							.eq("id", id);
+						if (error) {
+							console.error("message: DB_DELETE_HIGHLIGHT failed", error);
+							return { success: false };
+						}
+					}
+				}
+
+				return { success: true };
+			} catch (error) {
+				console.error("message: DB_DELETE_HIGHLIGHT failed", error);
+				return { success: false };
 			}
-
-			return { success: true };
 		});
 
 		onMessage("DB_DELETE_ALL_HIGHLIGHTS_BY_POST_ID", async (message) => {
