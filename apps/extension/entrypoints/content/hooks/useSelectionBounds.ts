@@ -8,17 +8,17 @@ type TextSelectionState = {
 	range?: Range;
 };
 
-const defaultState: TextSelectionState = {};
+const initialSelection: TextSelectionState = {};
 
 export function useSelectionBounds() {
 	const [{ clientRect, isCollapsed, range }, setState] =
-		useState<TextSelectionState>(defaultState);
+		useState<TextSelectionState>(initialSelection);
 
 	const handler = useCallback(() => {
 		const selection = window.getSelection();
 
 		if (selection === null || selection.rangeCount === 0) {
-			setState(defaultState);
+			setState(initialSelection);
 			return;
 		}
 

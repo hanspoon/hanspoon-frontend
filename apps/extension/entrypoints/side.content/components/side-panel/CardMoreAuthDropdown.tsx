@@ -1,14 +1,14 @@
+import type { Session } from "@supabase/supabase-js";
 import { useState } from "react";
+import { storage } from "@/apis/browser-storage";
 import type { LocalPost } from "@/lib/highlight/types";
 import { syncPostToSupabase } from "@/lib/sync/syncPostToSupabase";
 import {
 	deleteAllHighlightsByPostId,
 	deletePost,
-	syncEnqueue,
 	updatePost,
 } from "../../../../apis/fetcher";
 import menuDots from "../../../../public/menu-dots.svg";
-import { useSession } from "../../hooks/useSession";
 import { Dropdown, type DropdownMenuItem } from "../common/Dropdown";
 import { Modal } from "../common/Modal";
 import { useToast } from "../common/Toast";
@@ -17,10 +17,12 @@ interface CardMoreAuthDropdownProps {
 	post: LocalPost;
 }
 
-export const CardMoreAuthDropdown = ({ post }: CardMoreAuthDropdownProps) => {
+export const CardMoreAuthDropdown = async ({
+	post,
+}: CardMoreAuthDropdownProps) => {
 	const [isPublished, setIsPublished] = useState(post.isPublished);
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-	const { session } = useSession();
+	const session = (await storage.get<Session>("session")) ?? undefined;
 	const { showToast } = useToast();
 
 	const handleTogglePublish = async () => {
@@ -36,14 +38,6 @@ export const CardMoreAuthDropdown = ({ post }: CardMoreAuthDropdownProps) => {
 			} catch (error) {
 				console.error("Supabase 동기화 실패:", error);
 				showToast("공유 준비에 실패했습니다.", "error");
-				return;
-			}
-		} else {
-			try {
-				await syncEnqueue(post.id, "delete");
-			} catch (error) {
-				console.error("Supabase 삭제 요청 실패:", error);
-				showToast("공유 취소에 실패했습니다.", "error");
 				return;
 			}
 		}
@@ -92,9 +86,6 @@ export const CardMoreAuthDropdown = ({ post }: CardMoreAuthDropdownProps) => {
 	const handleConfirmDelete = async () => {
 		setIsDeleteModalOpen(false);
 		try {
-			if (isPublished) {
-				await syncEnqueue(post.id, "delete");
-			}
 			await deleteAllHighlightsByPostId(post.id);
 			await deletePost(post.id);
 			showToast("포스트가 삭제되었습니다.", "success");

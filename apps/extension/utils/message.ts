@@ -1,3 +1,4 @@
+import type { Session } from "@supabase/supabase-js";
 import { defineExtensionMessaging } from "@webext-core/messaging";
 import type {
 	LocalAnnotation,
@@ -37,13 +38,7 @@ export interface DBProtocolMap {
 	DB_DELETE_POST: (data: { postId: string }) => { success: boolean };
 
 	// 로그인
-	LOGIN_SUCCESS: (data: { session: unknown }) => { success: boolean };
-
-	// 동기화
-	SYNC_ENQUEUE: (data: {
-		postId: string;
-		action: "upsert" | "delete";
-	}) => { success: boolean };
+	LOGIN_SUCCESS: (data: { session: Session }) => { success: boolean };
 }
 
 export const { sendMessage, onMessage } =
