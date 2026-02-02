@@ -25,6 +25,7 @@
 		"posthog-js": "^1.336.4",
 		"react": "^19.1.1",
 		"react-dom": "^19.1.1",
+		"supabase": "^2.70.4",
 		"tailwindcss": "^4.1.17"
 	},
 	"devDependencies": {

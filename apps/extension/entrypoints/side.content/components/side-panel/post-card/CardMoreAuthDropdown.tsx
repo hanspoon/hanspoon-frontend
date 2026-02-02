@@ -1,29 +1,36 @@
 import type { Session } from "@supabase/supabase-js";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { storage } from "@/apis/browser-storage";
-import type { LocalPost } from "@/lib/highlight/types";
-import { syncPostToSupabase } from "@/lib/sync/syncPostToSupabase";
 import {
 	deleteAllHighlightsByPostId,
 	deletePost,
 	updatePost,
-} from "../../../../apis/fetcher";
-import menuDots from "../../../../public/menu-dots.svg";
-import { Dropdown, type DropdownMenuItem } from "../common/Dropdown";
-import { Modal } from "../common/Modal";
-import { useToast } from "../common/Toast";
+} from "@/apis/fetcher";
+import type { LocalPost } from "@/lib/highlight/types";
+import { syncPostToSupabase } from "@/lib/sync/syncPostToSupabase";
+import { Dropdown, type DropdownMenuItem } from "../../common/Dropdown";
+import { Modal } from "../../common/Modal";
+import { useToast } from "../../common/Toast";
 
 interface CardMoreAuthDropdownProps {
 	post: LocalPost;
 }
 
-export const CardMoreAuthDropdown = async ({
-	post,
-}: CardMoreAuthDropdownProps) => {
+export const CardMoreAuthDropdown = ({ post }: CardMoreAuthDropdownProps) => {
 	const [isPublished, setIsPublished] = useState(post.isPublished);
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-	const session = (await storage.get<Session>("session")) ?? undefined;
+	const [session, setSession] = useState<Session | undefined>(undefined);
 	const { showToast } = useToast();
+
+	useEffect(() => {
+		storage.get<Session>("session").then((s) => {
+			setSession(s ?? undefined);
+		});
+
+		return storage.subscribe<Session>("session", (newValue) => {
+			setSession(newValue);
+		});
+	}, []);
 
 	const handleTogglePublish = async () => {
 		const newPublishState = !isPublished;
@@ -72,10 +79,10 @@ export const CardMoreAuthDropdown = async ({
 
 		try {
 			await navigator.clipboard.writeText(shareUrl);
-			showToast("링크가 복사되었습니다!", "success");
+			showToast("링크가 복사되었어요", "success");
 		} catch (error) {
 			console.error("링크 복사 실패:", error);
-			showToast("링크 복사에 실패했습니다.", "error");
+			showToast("링크 복사에 실패했어요", "error");
 		}
 	};
 
@@ -140,13 +147,23 @@ export const CardMoreAuthDropdown = async ({
 							e.currentTarget.style.backgroundColor = "transparent";
 						}}
 					>
-						<img
-							src={menuDots}
-							width={12}
-							height={12}
-							alt="menu-dot"
-							style={{ display: "block" }}
-						/>
+						<svg
+							role="img"
+							aria-label="Menu"
+							xmlns="http://www.w3.org/2000/svg"
+							fill="none"
+							viewBox="0 0 24 24"
+							strokeWidth="1.5"
+							stroke="#6b7280"
+							width="20"
+							height="20"
+						>
+							<path
+								strokeLinecap="round"
+								strokeLinejoin="round"
+								d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
+							/>
+						</svg>
 					</div>
 				}
 				items={menuItems}

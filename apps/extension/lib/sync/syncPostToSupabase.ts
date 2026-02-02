@@ -16,39 +16,33 @@ export async function syncPostToSupabase(postId: string, session: Session) {
 		throw new Error("포스트를 찾을 수 없습니다");
 	}
 
-	const { error: postError } = await supabase.from("posts").upsert({
-		id: post.id,
-		url: post.url,
-		title: post.title,
-		user_id: session.user.id,
-		share_id: post.shareId,
-		updated_at: new Date().toISOString(),
-	});
+	await supabase
+		.from("posts")
+		.upsert({
+			id: post.id,
+			url: post.url,
+			title: post.title,
+			user_id: session.user.id,
+			share_id: post.shareId,
+			updated_at: new Date().toISOString(),
+		})
+		.throwOnError();
 
-	if (postError) {
-		console.error("❌ Post 업로드 실패:", postError);
-		throw postError;
-	}
-
-	// annotation
+	// 하이라이트
 	const highlights = await getAllHighlightsByPostId(postId);
 
-	const annotationsToUpload = highlights.map((ann) => ({
-		id: ann.id,
+	const highlightsToUpload = highlights.map((highlight) => ({
+		id: highlight.id,
 		post_id: post.id,
-		start_meta: ann.start,
-		end_meta: ann.end,
-		text: ann.text,
+		start_meta: highlight.start,
+		end_meta: highlight.end,
+		text: highlight.text,
 		user_id: session.user.id,
 		share_id: post.shareId,
 		updated_at: new Date().toISOString(),
 	}));
 
-	const { error: annError } = await supabase
-		.from("annotations")
-		.upsert(annotationsToUpload);
-
-	if (annError) throw annError;
+	await supabase.from("annotations").upsert(highlightsToUpload).throwOnError();
 
 	await updateAllHighlightsByPostId({
 		postId,

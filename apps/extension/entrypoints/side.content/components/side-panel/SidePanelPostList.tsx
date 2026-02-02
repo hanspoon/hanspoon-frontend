@@ -1,7 +1,7 @@
 import { useEffect, useSyncExternalStore } from "react";
 import { postSyncStore } from "@/lib/sync/postSyncStore";
 import { BlinkingText } from "../../../../components/common/BlinkingText";
-import { PostCard } from "./PostCard";
+import { PostCard } from "./post-card/PostCard";
 
 export const SidePanelPostList = () => {
 	const { posts: allPosts } = useSyncExternalStore(
