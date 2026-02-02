@@ -17,6 +17,7 @@ export default defineConfig({
 					drop_debugger: true,
 				},
 			} as any,
+			chunkSizeWarningLimit: 1000,
 		},
 	}),
 	manifest: {
