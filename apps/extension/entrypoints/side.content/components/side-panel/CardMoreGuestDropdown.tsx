@@ -19,7 +19,6 @@ export const CardMoreGuestDropdown = ({ post }: CardMoreGuestDropdownProps) => {
 	const { showToast } = useToast();
 
 	const handleLogin = async () => {
-		console.log("handleLogin");
 		try {
 			const { data, error } = await supabase.auth.signInWithOAuth({
 				provider: "google",

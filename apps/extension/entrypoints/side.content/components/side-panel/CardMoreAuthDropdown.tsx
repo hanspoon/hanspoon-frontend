@@ -1,5 +1,5 @@
 import type { Session } from "@supabase/supabase-js";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { storage } from "@/apis/browser-storage";
 import type { LocalPost } from "@/lib/highlight/types";
 import { syncPostToSupabase } from "@/lib/sync/syncPostToSupabase";
@@ -17,13 +17,23 @@ interface CardMoreAuthDropdownProps {
 	post: LocalPost;
 }
 
-export const CardMoreAuthDropdown = async ({
+export const CardMoreAuthDropdown = ({
 	post,
 }: CardMoreAuthDropdownProps) => {
 	const [isPublished, setIsPublished] = useState(post.isPublished);
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-	const session = (await storage.get<Session>("session")) ?? undefined;
+	const [session, setSession] = useState<Session | undefined>(undefined);
 	const { showToast } = useToast();
+
+	useEffect(() => {
+		storage.get<Session>("session").then((s) => {
+			setSession(s ?? undefined);
+		});
+
+		return storage.subscribe<Session>("session", (newValue) => {
+			setSession(newValue);
+		});
+	}, []);
 
 	const handleTogglePublish = async () => {
 		const newPublishState = !isPublished;
