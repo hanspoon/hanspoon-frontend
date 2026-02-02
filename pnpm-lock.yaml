@@ -47,6 +47,9 @@ importers:
       react-dom:
         specifier: ^19.1.1
         version: 19.2.0(react@19.2.0)
+      supabase:
+        specifier: ^2.70.4
+        version: 2.70.4
       tailwindcss:
         specifier: ^4.1.17
         version: 4.1.17
