@@ -1,4 +1,5 @@
 import type { Session } from "@supabase/supabase-js";
+import { storage } from "@/apis/browser-storage";
 import { initSupabaseSession, supabase } from "@/lib/supabase/supabase";
 
 import { onMessage } from "../../utils/message";
@@ -66,9 +67,11 @@ export default defineBackground({
 				const post = await apis.getPostByIdBackground(postId);
 
 				if (post?.isPublished) {
-					const { session } = await browser.storage.local.get<{
-						session: Session;
-					}>("session");
+					const session = await storage.get<Session>("session");
+
+					if (!session) {
+						return { success: false };
+					}
 
 					await supabase
 						.from("annotations")

@@ -1,11 +1,11 @@
 import { useState } from "react";
+import { storage } from "@/apis/browser-storage";
 import type { LocalPost } from "@/lib/highlight/types";
-import { useSession } from "../../hooks/useSession";
 import { CardMoreAuthDropdown } from "./CardMoreAuthDropdown";
 import { CardMoreGuestDropdown } from "./CardMoreGuestDropdown";
 
-export const PostCard = ({ post }: { post: LocalPost }) => {
-	const { session } = useSession();
+export const PostCard = async ({ post }: { post: LocalPost }) => {
+	const session = await storage.get("session");
 	const isLoggedIn = !!session;
 	const [isHovered, setIsHovered] = useState(false);
 

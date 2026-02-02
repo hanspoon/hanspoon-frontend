@@ -1,4 +1,6 @@
+import type { Session } from "@supabase/supabase-js";
 import { useState } from "react";
+import { storage } from "@/apis/browser-storage";
 import type { LocalPost } from "@/lib/highlight/types";
 import { syncPostToSupabase } from "@/lib/sync/syncPostToSupabase";
 import {
@@ -7,7 +9,6 @@ import {
 	updatePost,
 } from "../../../../apis/fetcher";
 import menuDots from "../../../../public/menu-dots.svg";
-import { useSession } from "../../hooks/useSession";
 import { Dropdown, type DropdownMenuItem } from "../common/Dropdown";
 import { Modal } from "../common/Modal";
 import { useToast } from "../common/Toast";
@@ -16,10 +17,12 @@ interface CardMoreAuthDropdownProps {
 	post: LocalPost;
 }
 
-export const CardMoreAuthDropdown = ({ post }: CardMoreAuthDropdownProps) => {
+export const CardMoreAuthDropdown = async ({
+	post,
+}: CardMoreAuthDropdownProps) => {
 	const [isPublished, setIsPublished] = useState(post.isPublished);
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-	const { session } = useSession();
+	const session = (await storage.get<Session>("session")) ?? undefined;
 	const { showToast } = useToast();
 
 	const handleTogglePublish = async () => {
