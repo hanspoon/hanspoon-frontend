@@ -17,10 +17,11 @@ export default defineConfig({
 					drop_debugger: true,
 				},
 			} as any,
+			chunkSizeWarningLimit: 1000,
 		},
 	}),
 	manifest: {
-		permissions: ["storage", "tabs", "identity"],
+		permissions: ["storage", "tabs"],
 		externally_connectable: {
 			ids: ["dclfepbfjokpcpdklodeljlhbmbmcjjb"],
 			matches: ["http://localhost:5173/*"],

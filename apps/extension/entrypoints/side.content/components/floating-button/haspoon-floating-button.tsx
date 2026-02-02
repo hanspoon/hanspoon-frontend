@@ -1,4 +1,4 @@
-import logo from "../../../../public/logo.svg";
+import logo from "../../../../public/logo.png";
 import { useFloatingButtonStatus } from "../../hooks/useFloatingButtonStatus";
 import { Dropdown, type DropdownMenuItem } from "../common/Dropdown";
 

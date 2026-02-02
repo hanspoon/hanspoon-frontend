@@ -1,10 +1,9 @@
-import type {
-	LocalAnnotation,
-	LocalPost,
-	SerializedHighlight,
-} from "../lib/highlight/types";
-import { db } from "../models/db";
-import { onMessage } from "../utils/message";
+import type { Session } from "@supabase/supabase-js";
+import { storage } from "@/apis/browser-storage";
+import { initSupabaseSession, supabase } from "@/lib/supabase/supabase";
+
+import { onMessage } from "../../utils/message";
+import * as apis from "./apis";
 
 export type HighlightSyncMessage =
 	| {
@@ -39,143 +38,113 @@ const broadcastToAll = (message: HighlightSyncMessage) => {
 	});
 };
 
-// 하이라이트
-const createHightLightBackground = async ({
-	data,
-	postId,
-}: {
-	data: SerializedHighlight;
-	postId: string;
-}) => {
-	const annotation: LocalAnnotation = {
-		...data,
-		postId: postId,
-		createdAt: Date.now(),
-		updatedAt: Date.now(),
-		shareId: crypto.randomUUID(),
-		isSynced: false,
-	};
-
-	await db.annotations.add(annotation);
-};
-
-const updateAllHighlightsByPostIdBackground = ({
-	postId,
-	updates,
-}: {
-	postId: string;
-	updates: Partial<LocalAnnotation>;
-}) => {
-	return db.annotations.upsert(postId, updates);
-};
-
-const getAllHighlightsBackground = () => {
-	return db.annotations.toArray();
-};
-
-const getAllHighlightsByPostIdBackground = (postId: string) => {
-	return db.annotations.where("postId").equals(postId).toArray();
-};
-
-const deleteHighlightBackground = async (id: string) => {
-	await db.annotations.delete(id);
-};
-
-const deleteAllHighlightsByPostIdBackground = async (postId: string) => {
-	await db.annotations.where("postId").equals(postId).delete();
-};
-
-// 포스트
-const createPostBackground = async (data: LocalPost) => {
-	await db.posts.add(data);
-};
-
-const updatePostBackground = async ({
-	postId,
-	updates,
-}: {
-	postId: string;
-	updates: Partial<LocalPost>;
-}) => {
-	await db.posts.update(postId, updates);
-};
-
-const getPostByIdBackground = async (id: string) => {
-	return await db.posts.get(id);
-};
-
-const getPostByUrlBackground = async (url: string) => {
-	return await db.posts.where("url").equals(url).first();
-};
-
-const getAllPostsBackground = async () => {
-	return await db.posts.toArray();
-};
-
-const deletePostBackground = async (postId: string) => {
-	await db.posts.delete(postId);
-};
-
 // 로그인
-const saveLoginSessionBackground = async (session: unknown) => {
-	return new Promise<{ success: boolean }>((resolve) => {
-		browser.storage.local.set({ session }, () => {
-			resolve({ success: true });
-		});
-	});
+const saveLoginSessionBackground = async (session: Session) => {
+	await storage.set("session", session);
+	return { success: true };
 };
 
 export default defineBackground({
 	type: "module",
-	main() {
+	async main() {
+		await initSupabaseSession();
+
 		// 하이라이트
 		onMessage("DB_CREATE_HIGHLIGHT", async (message) => {
-			const { data, postId } = message.data;
-			await createHightLightBackground({ data, postId });
+			try {
+				const { data: highlight, postId } = message.data;
+				await apis.createHightLightBackground({ data: highlight, postId });
 
-			broadcastToAll({
-				type: "HIGHLIGHT_CREATED",
-				id: data.id,
-				postId,
-				timestamp: performance.timeOrigin + performance.now(),
-			});
+				broadcastToAll({
+					type: "HIGHLIGHT_CREATED",
+					id: highlight.id,
+					postId,
+					timestamp: performance.timeOrigin + performance.now(),
+				});
+				const post = await apis.getPostByIdBackground(postId);
 
-			return { success: true };
+				if (post?.isPublished) {
+					const session = await storage.get<Session>("session");
+
+					if (!session) {
+						return { success: false };
+					}
+
+					await supabase
+						.from("annotations")
+						.insert({
+							id: highlight.id,
+							post_id: post.id,
+							start_meta: highlight.start,
+							end_meta: highlight.end,
+							text: highlight.text,
+							user_id: session.user.id,
+							share_id: post.shareId,
+							updated_at: new Date().toISOString(),
+						})
+						.throwOnError();
+				}
+				return { success: true };
+			} catch (error) {
+				console.error("message: DB_CREATE_HIGHLIGHT failed", error);
+				return { success: false };
+			}
 		});
 
 		onMessage("DB_UPDATE_ALL_HIGHLIGHTS_BY_POST_ID", async (message) => {
 			const { postId, updates } = message.data;
-			await updateAllHighlightsByPostIdBackground({ postId, updates });
+			await apis.updateAllHighlightsByPostIdBackground({ postId, updates });
 			return { success: true };
 		});
 
 		onMessage("DB_GET_ALL_HIGHLIGHTS", async () => {
-			const highlights = await getAllHighlightsBackground();
+			const highlights = await apis.getAllHighlightsBackground();
 			return highlights;
 		});
 
 		onMessage("DB_GET_ALL_HIGHLIGHTS_BY_ID", async (message) => {
 			const { postId } = message.data;
-			const highlights = await getAllHighlightsByPostIdBackground(postId);
+			const highlights = await apis.getAllHighlightsByPostIdBackground(postId);
 			return highlights;
 		});
 
 		onMessage("DB_DELETE_HIGHLIGHT", async (message) => {
-			const { id } = message.data;
-			await deleteHighlightBackground(id);
+			try {
+				const { id } = message.data;
 
-			broadcastToAll({
-				type: "HIGHLIGHT_DELETED",
-				id,
-				timestamp: performance.timeOrigin + performance.now(),
-			});
+				const highlight = await apis.getHighlightByIdBackground(id);
 
-			return { success: true };
+				if (!highlight) {
+					return { success: false };
+				}
+
+				await apis.deleteHighlightBackground(id);
+
+				broadcastToAll({
+					type: "HIGHLIGHT_DELETED",
+					id,
+					timestamp: performance.timeOrigin + performance.now(),
+				});
+
+				const post = await apis.getPostByIdBackground(highlight.postId);
+				if (post?.isPublished) {
+					await supabase
+						.from("annotations")
+						.delete()
+						.eq("id", id)
+						.throwOnError();
+				}
+
+				return { success: true };
+			} catch (error) {
+				console.error("message: DB_DELETE_HIGHLIGHT failed", error);
+				return { success: false };
+			}
 		});
 
 		onMessage("DB_DELETE_ALL_HIGHLIGHTS_BY_POST_ID", async (message) => {
 			const { postId } = message.data;
-			await deleteAllHighlightsByPostIdBackground(postId);
+			await apis.deleteAllHighlightsByPostIdBackground(postId);
 
 			broadcastToAll({
 				type: "All_HIGHLIGHTS_DELETED",
@@ -189,7 +158,7 @@ export default defineBackground({
 		// 포스트
 		onMessage("DB_CREATE_POST", async (message) => {
 			const { postData } = message.data;
-			await createPostBackground(postData);
+			await apis.createPostBackground(postData);
 
 			broadcastToAll({
 				type: "POST_CREATED",
@@ -202,30 +171,30 @@ export default defineBackground({
 
 		onMessage("DB_UPDATE_POST", async (message) => {
 			const { postId, updates } = message.data;
-			await updatePostBackground({ postId, updates });
+			await apis.updatePostBackground({ postId, updates });
 			return { success: true };
 		});
 
 		onMessage("DB_GET_POST_BY_ID", async (message) => {
 			const { postId } = message.data;
-			const post = await getPostByIdBackground(postId);
+			const post = await apis.getPostByIdBackground(postId);
 			return post;
 		});
 
 		onMessage("DB_GET_POST_BY_URL", async (message) => {
 			const { url } = message.data;
-			const post = await getPostByUrlBackground(url);
+			const post = await apis.getPostByUrlBackground(url);
 			return post;
 		});
 
 		onMessage("DB_GET_ALL_POSTS", async () => {
-			const posts = await getAllPostsBackground();
+			const posts = await apis.getAllPostsBackground();
 			return posts;
 		});
 
 		onMessage("DB_DELETE_POST", async (message) => {
 			const { postId } = message.data;
-			await deletePostBackground(postId);
+			await apis.deletePostBackground(postId);
 
 			broadcastToAll({
 				type: "POST_DELETED",

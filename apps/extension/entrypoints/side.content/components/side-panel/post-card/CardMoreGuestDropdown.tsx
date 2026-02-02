@@ -1,19 +1,10 @@
-import { createClient } from "@supabase/supabase-js";
 import { useState } from "react";
+import { deleteAllHighlightsByPostId, deletePost } from "@/apis/fetcher";
 import type { LocalPost } from "@/lib/highlight/types";
-import {
-	deleteAllHighlightsByPostId,
-	deletePost,
-} from "../../../../apis/fetcher";
-import menuDots from "../../../../public/menu-dots.svg";
-import { Dropdown, type DropdownMenuItem } from "../common/Dropdown";
-import { Modal } from "../common/Modal";
-import { useToast } from "../common/Toast";
-
-const supabase = createClient(
-	import.meta.env.VITE_SUPABASE_URL,
-	import.meta.env.VITE_SUPABASE_ANON_KEY,
-);
+import { supabase } from "@/lib/supabase/supabase";
+import { Dropdown, type DropdownMenuItem } from "../../common/Dropdown";
+import { Modal } from "../../common/Modal";
+import { useToast } from "../../common/Toast";
 
 interface CardMoreGuestDropdownProps {
 	post: LocalPost;
@@ -24,7 +15,6 @@ export const CardMoreGuestDropdown = ({ post }: CardMoreGuestDropdownProps) => {
 	const { showToast } = useToast();
 
 	const handleLogin = async () => {
-		console.log("handleLogin");
 		try {
 			const { data, error } = await supabase.auth.signInWithOAuth({
 				provider: "google",
@@ -34,8 +24,8 @@ export const CardMoreGuestDropdown = ({ post }: CardMoreGuestDropdownProps) => {
 						prompt: "consent",
 					},
 					redirectTo: import.meta.env.DEV
-					? "http://localhost:5173/auth/callback"
-					: "https://hanspoon.vercel.app/auth/callback",
+						? "http://localhost:5173/auth/callback"
+						: "https://hanspoon.vercel.app/auth/callback",
 					skipBrowserRedirect: true,
 				},
 			});
@@ -104,13 +94,23 @@ export const CardMoreGuestDropdown = ({ post }: CardMoreGuestDropdownProps) => {
 							e.currentTarget.style.backgroundColor = "transparent";
 						}}
 					>
-						<img
-							src={menuDots}
-							width={12}
-							height={12}
-							alt="menu-dot"
-							style={{ display: "block" }}
+						<svg
+						role="img"
+						aria-label="Menu"
+						xmlns="http://www.w3.org/2000/svg"
+						fill="none"
+						viewBox="0 0 24 24"
+						strokeWidth="1.5"
+						stroke="#6b7280"
+						width="20"
+						height="20"
+					>
+						<path
+							strokeLinecap="round"
+							strokeLinejoin="round"
+							d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
 						/>
+					</svg>
 					</div>
 				}
 				items={menuItems}

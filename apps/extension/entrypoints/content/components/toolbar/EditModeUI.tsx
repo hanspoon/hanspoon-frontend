@@ -1,10 +1,11 @@
 import { deleteHighlight } from "@/apis/fetcher";
 import { removeHighlight } from "@/lib/highlight/remove";
+import { useHighlightSelection } from "../../hooks/useHighlightSelection";
 
 export const EditModeUI = () => {
 	const { clickedHighlight, clearHighlightSelection } = useHighlightSelection();
 
-	if (!clickedHighlight) {
+	if (clickedHighlight === null) {
 		return null;
 	}
 
@@ -39,11 +40,6 @@ export const EditModeUI = () => {
 						await deleteHighlight(clickedHighlight.id);
 						clearHighlightSelection();
 					}
-				}}
-				style={{
-					background: "none",
-					border: "none",
-					cursor: "pointer",
 				}}
 			>
 				Unhighlight
