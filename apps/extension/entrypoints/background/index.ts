@@ -93,16 +93,8 @@ export default defineBackground({
 
 		onMessage("DB_UPDATE_ALL_HIGHLIGHTS_BY_POST_ID", async (message) => {
 			const { postId, updates } = message.data;
-			try {
-				await apis.updateAllHighlightsByPostIdBackground({ postId, updates });
-				return { success: true };
-			} catch (error) {
-				console.error(
-					"message: DB_UPDATE_ALL_HIGHLIGHTS_BY_POST_ID failed",
-					error,
-				);
-				return { success: false };
-			}
+			await apis.updateAllHighlightsByPostIdBackground({ postId, updates });
+			return { success: true };
 		});
 
 		onMessage("DB_GET_ALL_HIGHLIGHTS", async () => {
