@@ -39,12 +39,9 @@ const broadcastToAll = (message: HighlightSyncMessage) => {
 };
 
 // 로그인
-const saveLoginSessionBackground = async (session: unknown) => {
-	return new Promise<{ success: boolean }>((resolve) => {
-		browser.storage.local.set({ session }, () => {
-			resolve({ success: true });
-		});
-	});
+const saveLoginSessionBackground = async (session: Session) => {
+	await storage.set("session", session);
+	return { success: true };
 };
 
 export default defineBackground({
