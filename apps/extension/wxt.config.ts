@@ -21,7 +21,7 @@ export default defineConfig({
 		},
 	}),
 	manifest: {
-		permissions: ["storage", "tabs", "identity"],
+		permissions: ["storage", "tabs"],
 		externally_connectable: {
 			ids: ["dclfepbfjokpcpdklodeljlhbmbmcjjb"],
 			matches: ["http://localhost:5173/*"],
