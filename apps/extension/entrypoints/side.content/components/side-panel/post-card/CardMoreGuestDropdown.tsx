@@ -1,14 +1,11 @@
 import { useState } from "react";
+import { deleteAllHighlightsByPostId, deletePost } from "@/apis/fetcher";
 import type { LocalPost } from "@/lib/highlight/types";
 import { supabase } from "@/lib/supabase/supabase";
-import {
-	deleteAllHighlightsByPostId,
-	deletePost,
-} from "../../../../apis/fetcher";
 import menuDots from "../../../../public/menu-dots.svg";
-import { Dropdown, type DropdownMenuItem } from "../common/Dropdown";
-import { Modal } from "../common/Modal";
-import { useToast } from "../common/Toast";
+import { Dropdown, type DropdownMenuItem } from "../../common/Dropdown";
+import { Modal } from "../../common/Modal";
+import { useToast } from "../../common/Toast";
 
 interface CardMoreGuestDropdownProps {
 	post: LocalPost;

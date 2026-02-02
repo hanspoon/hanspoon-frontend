@@ -1,25 +1,23 @@
 import type { Session } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
 import { storage } from "@/apis/browser-storage";
-import type { LocalPost } from "@/lib/highlight/types";
-import { syncPostToSupabase } from "@/lib/sync/syncPostToSupabase";
 import {
 	deleteAllHighlightsByPostId,
 	deletePost,
 	updatePost,
-} from "../../../../apis/fetcher";
+} from "@/apis/fetcher";
+import type { LocalPost } from "@/lib/highlight/types";
+import { syncPostToSupabase } from "@/lib/sync/syncPostToSupabase";
 import menuDots from "../../../../public/menu-dots.svg";
-import { Dropdown, type DropdownMenuItem } from "../common/Dropdown";
-import { Modal } from "../common/Modal";
-import { useToast } from "../common/Toast";
+import { Dropdown, type DropdownMenuItem } from "../../common/Dropdown";
+import { Modal } from "../../common/Modal";
+import { useToast } from "../../common/Toast";
 
 interface CardMoreAuthDropdownProps {
 	post: LocalPost;
 }
 
-export const CardMoreAuthDropdown = ({
-	post,
-}: CardMoreAuthDropdownProps) => {
+export const CardMoreAuthDropdown = ({ post }: CardMoreAuthDropdownProps) => {
 	const [isPublished, setIsPublished] = useState(post.isPublished);
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 	const [session, setSession] = useState<Session | undefined>(undefined);

@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { storage } from "@/apis/browser-storage";
 import type { LocalPost } from "@/lib/highlight/types";
-import { CardMoreAuthDropdown } from "./CardMoreAuthDropdown";
-import { CardMoreGuestDropdown } from "./CardMoreGuestDropdown";
+import { CardMoreAuthDropdown } from "../post-card/CardMoreAuthDropdown";
+import { CardMoreGuestDropdown } from "../post-card/CardMoreGuestDropdown";
 
 export const PostCard = ({ post }: { post: LocalPost }) => {
 	const [isLoggedIn, setIsLoggedIn] = useState(false);
