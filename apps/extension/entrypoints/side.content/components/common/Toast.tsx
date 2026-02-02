@@ -45,36 +45,78 @@ export const ToastProvider = ({ children }: ToastProviderProps) => {
 		}, 3000);
 	}, []);
 
-	const getToastStyles = (type: ToastType) => {
-		const baseStyles = {
-			padding: "12px 20px",
-			borderRadius: "8px",
-			fontSize: "14px",
-			fontWeight: "500" as const,
-			boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-			animation: "slideIn 0.3s ease-out",
-		};
-
+	const getIcon = (type: ToastType) => {
 		switch (type) {
 			case "success":
-				return {
-					...baseStyles,
-					backgroundColor: "#10b981",
-					color: "white",
-				};
+				return (
+					<svg
+						role="img"
+						aria-label="Check"
+						xmlns="http://www.w3.org/2000/svg"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke-width="1.5"
+						stroke="currentColor"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+						/>
+					</svg>
+				);
 			case "error":
-				return {
-					...baseStyles,
-					backgroundColor: "#ef4444",
-					color: "white",
-				};
+				return (
+					<svg
+						role="img"
+						aria-label="Error"
+						xmlns="http://www.w3.org/2000/svg"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke-width="1.5"
+						stroke="currentColor"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"
+						/>
+					</svg>
+				);
 			default:
-				return {
-					...baseStyles,
-					backgroundColor: "#3b82f6",
-					color: "white",
-				};
+				return (
+					<svg
+						role="img"
+						aria-label="Info"
+						xmlns="http://www.w3.org/2000/svg"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke-width="1.5"
+						stroke="currentColor"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"
+						/>
+					</svg>
+				);
 		}
+	};
+
+	const toastStyles = {
+		display: "flex",
+		alignItems: "center",
+		gap: "10px",
+		padding: "12px 16px",
+		borderRadius: "10px",
+		fontSize: "13px",
+		fontWeight: "500" as const,
+		backgroundColor: "rgba(24, 24, 27, 0.95)",
+		color: "#fafafa",
+		boxShadow: "0 8px 32px rgba(0, 0, 0, 0.24), 0 2px 8px rgba(0, 0, 0, 0.12)",
+		animation: "slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+		backdropFilter: "blur(8px)",
 	};
 
 	return (
@@ -108,7 +150,8 @@ export const ToastProvider = ({ children }: ToastProviderProps) => {
 						}}
 					>
 						{toasts.map((toast) => (
-							<div key={toast.id} style={getToastStyles(toast.type)}>
+							<div key={toast.id} style={toastStyles}>
+								<div style={{ width: "24px" }}>{getIcon(toast.type)}</div>
 								{toast.message}
 							</div>
 						))}
