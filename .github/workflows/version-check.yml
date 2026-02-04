@@ -1,0 +1,48 @@
+name: Version Check
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/extension/**'
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+
+      - name: Fetch main branch
+        run: git fetch origin main:refs/remotes/origin/main
+
+      - name: Check extension version bump
+        run: |
+          # main 브랜치에서 버전 가져오기 (파일이 없으면 0.0.0으로 처리)
+          if git show origin/main:apps/extension/package.json > /tmp/main-package.json 2>/dev/null; then
+            CURRENT=$(jq -r '.version' /tmp/main-package.json)
+          else
+            echo "main 브랜치에 package.json이 없음 - 첫 릴리즈로 간주"
+            CURRENT="0.0.0"
+          fi
+
+          # PR 브랜치의 새 버전
+          NEW=$(jq -r '.version' apps/extension/package.json)
+
+          echo "========================================"
+          echo "현재 main 버전: $CURRENT"
+          echo "PR 버전: $NEW"
+          echo "========================================"
+
+          if [ "$CURRENT" = "$NEW" ]; then
+            echo ""
+            echo "::error::버전이 변경되지 않았습니다!"
+            echo ""
+            echo "apps/extension/package.json의 version을 올려주세요."
+            NEXT=$(echo "$CURRENT" | awk -F. '{print $1"."$2"."$3+1}')
+            echo "예시: $CURRENT → $NEXT"
+            exit 1
+          fi
+
+          echo ""
+          echo "✅ 버전 변경 확인: $CURRENT → $NEW"
