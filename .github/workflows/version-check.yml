@@ -13,16 +13,14 @@ jobs:
       - name: Checkout PR branch
         uses: actions/checkout@v4
 
-      - name: Fetch main branch
-        run: git fetch origin main:refs/remotes/origin/main
-
       - name: Check extension version bump
         run: |
-          # main 브랜치에서 버전 가져오기 (파일이 없으면 0.0.0으로 처리)
-          if git show origin/main:apps/extension/package.json > /tmp/main-package.json 2>/dev/null; then
-            CURRENT=$(jq -r '.version' /tmp/main-package.json)
+          # PR 베이스 커밋(PR 생성 시점의 main)에서 버전 가져오기
+          BASE_SHA=${{ github.event.pull_request.base.sha }}
+          if git show ${BASE_SHA}:apps/extension/package.json > /tmp/base-package.json 2>/dev/null; then
+            CURRENT=$(jq -r '.version' /tmp/base-package.json)
           else
-            echo "main 브랜치에 package.json이 없음 - 첫 릴리즈로 간주"
+            echo "베이스 커밋에 package.json이 없음 - 첫 릴리즈로 간주"
             CURRENT="0.0.0"
           fi
 
