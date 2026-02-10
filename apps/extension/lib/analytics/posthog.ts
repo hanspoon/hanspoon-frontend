@@ -18,6 +18,7 @@ export const initPostHog = () => {
 		autocapture: false,
 		capture_pageview: false,
 		disable_session_recording: true,
+		disable_external_dependency_loading: true,
 	});
 
 	isInitialized = true;
