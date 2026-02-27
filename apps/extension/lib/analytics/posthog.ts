@@ -1,4 +1,4 @@
-import posthog from "posthog-js";
+import posthog from "posthog-js/dist/module.no-external";
 
 let isInitialized = false;
 
