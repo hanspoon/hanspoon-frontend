@@ -1,10 +1,17 @@
-# 한스푼
+<div align="center">
 
-- [서비스 소개](#-서비스-소개)
-- [기획 배경](#-기획-배경)
-- [기술 스택](#-기술-스택)
-- [핵심 기능](#-핵심-기능)
-- [개발 기록](#-개발-기록)
+<img width="350" height="350" alt="logo" src="https://github.com/user-attachments/assets/1c311563-5e84-46f3-8177-fe8ce29c3640" />
+
+읽은 문장을 내 것으로 만드는 한 스푼 
+
+</div>
+
+
+- [서비스 소개](https://github.com/hanspoon/hanspoon-frontend/edit/chore/update-readme/README.md?pr=/hanspoon/hanspoon-frontend/pull/16#%EC%84%9C%EB%B9%84%EC%8A%A4-%EC%86%8C%EA%B0%9C)
+- [기획 배경](https://github.com/hanspoon/hanspoon-frontend/edit/chore/update-readme/README.md?pr=/hanspoon/hanspoon-frontend/pull/16#%EA%B8%B0%ED%9A%8D-%EB%B0%B0%EA%B2%BD)
+- [기술 스택](https://github.com/hanspoon/hanspoon-frontend/edit/chore/update-readme/README.md?pr=/hanspoon/hanspoon-frontend/pull/16#%EA%B8%B0%EC%88%A0-%EC%8A%A4%ED%83%9D)
+- [핵심 기능](https://github.com/hanspoon/hanspoon-frontend/edit/chore/update-readme/README.md?pr=/hanspoon/hanspoon-frontend/pull/16#%ED%95%B5%EC%8B%AC-%EA%B8%B0%EB%8A%A5)
+- [개발 기록](https://github.com/hanspoon/hanspoon-frontend/edit/chore/update-readme/README.md?pr=/hanspoon/hanspoon-frontend/pull/16#%EA%B0%9C%EB%B0%9C-%EA%B8%B0%EB%A1%9D)
 
 # 한스푼
 
@@ -48,6 +55,10 @@
 
 #### 1. 드래그로 문장 하이라이팅
 
+<p align="center">
+  <img width="600" height="400" alt="image" src="https://github.com/user-attachments/assets/a36f9d44-6392-4f43-bf24-4c98b20acfd1" />
+</p>
+
 웹 페이지를 읽다가 마음에 드는 문장을 드래그하면 하이라이트 툴바가 나타납니다. 버튼 하나로 문장이 IndexedDB에 즉시 저장되고, 다음에 같은 페이지를 방문해도 하이라이트가 복원됩니다.
 
 - 브라우저를 떠나지 않고 읽는 맥락 안에서 바로 포착
@@ -55,6 +66,9 @@
 - 로그인 없이 로컬에서 즉시 사용 가능
 
 #### 2. 사이드 패널에서 하이라이트 모아보기
+<p align="center">
+  <img width="600" height="400" alt="image" src="https://github.com/user-attachments/assets/d590d10c-2afc-4e88-a5b3-d43002cf695d" />
+</p>
 
 익스텐션 아이콘을 클릭하면 사이드 패널이 열립니다. 지금까지 하이라이트한 아티클 목록과 각 문장들을 한눈에 확인할 수 있습니다.
 
@@ -63,6 +77,14 @@
 - 로그인 시 Supabase 클라우드에 자동 동기화
 
 #### 3. 링크 하나로 하이라이트 공유
+
+<p align="center">
+  <img width="400" height="300" alt="image" src="https://github.com/user-attachments/assets/c15d8d86-3b74-495d-a587-b3d5c0179e2c" />
+  <img width="400" height="300" alt="image" src="https://github.com/user-attachments/assets/9b339aed-73af-4f95-9eb6-561505705545" />
+</p>
+<p align="center">
+  <img width="400" height="400" alt="image" src="https://github.com/user-attachments/assets/8fd7adb9-65b4-48cc-b8a2-9a21352e5730" />
+</p>
 
 내가 모은 문장들을 링크 하나로 공유할 수 있습니다. 공유 페이지는 하이라이트 문장들을 그리드 카드 형태로 시각적으로 보여주며, 원본 아티클 링크도 함께 제공합니다.
 
